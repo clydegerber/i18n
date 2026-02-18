@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "properties.dtd">
+<properties>
+    <entry key='key1'>value1</entry>
+    <entry key='key2'>value2</entry>
+    <entry key='key3'>
+        <array>
+            <item>value3A</item>
+            <item>value3B</item>
+            <item>value3C</item>
+        </array>
+    </entry>
+    <entry key='key4'>
+            <object type='dev.javai18n.core.test.SimpleAttributeCollection'>
+            <entry key='name'>My name</entry>
+            <entry key='value'>My value</entry>
+        </object>
+    </entry>
+    <entry key='key5'>value5</entry>
+    <entry key='key6'>
+        <array>
+            <object type='dev.javai18n.core.test.SimpleAttributeCollection'>
+                <entry key='name'>My nameA</entry>
+                <entry key='value'>My valueA</entry>
+            </object>
+            <object type='dev.javai18n.core.test.SimpleAttributeCollection'>
+                <entry key='name'>My nameB</entry>
+                <entry key='value'>My valueB</entry>
+            </object>
+            <object type='dev.javai18n.core.test.SimpleAttributeCollection'>
+                <entry key='name'>My nameC</entry>
+                <entry key='value'>My valueC</entry>
+            </object>
+        </array>
+    </entry>
+</properties>

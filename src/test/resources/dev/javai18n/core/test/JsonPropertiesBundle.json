@@ -1,0 +1,29 @@
+{
+  "key1": "value1",
+  "key2": "value2",
+  "key3": ["value3A", "value3B", "value3C"],
+  "key4":
+  {
+    "type": "dev.javai18n.core.test.SimpleAttributeCollection",
+    "name": "My name",
+    "value": "My value"
+  },
+  "key5": "value5",
+  "key6":
+    [
+      {
+        "type": "dev.javai18n.core.test.SimpleAttributeCollection",
+        "name": "My nameA",
+        "value": "My valueA"
+      },
+      {
+        "type": "dev.javai18n.core.test.SimpleAttributeCollection",
+        "name": "My nameB",
+        "value": "My valueB"
+      },      {
+        "type": "dev.javai18n.core.test.SimpleAttributeCollection",
+        "name": "My nameC",
+        "value": "My valueC"
+      }
+    ]
+}
