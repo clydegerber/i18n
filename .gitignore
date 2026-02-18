@@ -27,3 +27,8 @@ dev.javai18n.core/
 
 # Maven
 dependency-reduced-pom.xml
+
+# Secrets
+Maven_Central_Token.txt
+gpg key.txt
+gpg_passphrase.txt

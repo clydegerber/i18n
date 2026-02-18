@@ -8,7 +8,7 @@
 
     <name>i18n-core</name>
     <description>A Java framework for internationalization that provides interfaces to identify localizable classes, an event mechanism to support dynamic locale selection, polymorphic resource inheritance, and use of complex resource objects defined in JSON or XML files.</description>
-    <url>https://github.com/TODO/i18n</url>
+    <url>https://github.com/clydegerber/i18n</url>
 
     <licenses>
         <license>
@@ -25,9 +25,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/TODO/i18n.git</connection>
-        <developerConnection>scm:git:https://github.com/TODO/i18n.git</developerConnection>
-        <url>https://github.com/TODO/i18n</url>
+        <connection>scm:git:https://github.com/clydegerber/i18n.git</connection>
+        <developerConnection>scm:git:https://github.com/clydegerber/i18n.git</developerConnection>
+        <url>https://github.com/clydegerber/i18n</url>
     </scm>
 
     <dependencies>
