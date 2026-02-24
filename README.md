@@ -453,6 +453,7 @@ Editorial comment: The ResourceBundleProvider spi doesn't strike one as elegant 
 | `LocalizationDelegate` | Delegation helper for bundles and polymorphic inheritance support |
 | `Resourceful` | Interface for objects with a `Resource` |
 | `Resource` | Encapsulates source and key for lookup |
+| `ResourcefulDelegate` | Delegation helper for Resourceful behavior |
 | `NestedResourceBundle` | ResourceBundle hierarchy support |
 | `JsonResourceBundle` | Bundle loaded from JSON |
 | `XMLResourceBundle` | Bundle loaded from XML |

@@ -89,9 +89,11 @@ public class LocalizableLogger implements Localizable, System.Logger
 
     /**
      * Constructs a new LocalizableLogger for the specified name with the default Locale.
+     * Subclasses in other modules can use this constructor to create loggers whose resource
+     * bundles are resolved from the subclass's module.
      * @param name the name of the logger.
      */
-    private LocalizableLogger(String name)
+    protected LocalizableLogger(String name)
     {
         this.name = name;
         delegate = new LocalizationDelegate(this);
