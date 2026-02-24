@@ -16,9 +16,11 @@
 
 package dev.javai18n.core;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.ObjectReadContext;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,8 +39,8 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
     {
         /** The root context at the start and end of parsing. */
         ROOT,
-        /** A JSON field name has been encountered. */
-        FIELD,
+        /** A JSON property name has been encountered. */
+        PROPERTY,
         /** An array is being parsed. */
         ARRAY,
         /** An object is being parsed. */
@@ -48,7 +50,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
     /**
      * The full context for the parsing operation. Parsing starts and ends in the ROOT state and progresses
      * through the other states as the document is parsed. The ParseContext is maintained in a Stack and
-     * the object contained in the ParseContext is either the name of the field being parsed, the {@code ArrayList<Object>}
+     * the object contained in the ParseContext is either the name of the property being parsed, the {@code ArrayList<Object>}
      * of array elements being parsed, or the AttributeCollection object being parsed.
      *
      * @param type   the context type.
@@ -68,7 +70,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
     public JsonResourceBundle(InputStream stream) throws IOException
     {
         props = new ConcurrentHashMap<>();
-        try (JsonParser parser = JSON_FACTORY.createParser(stream))
+        try (JsonParser parser = JSON_FACTORY.createParser(ObjectReadContext.empty(), stream))
         {
             // First token should be START_OBJECT, consume it
             if (parser.nextToken() != JsonToken.START_OBJECT) return;
@@ -78,18 +80,18 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
             {
                 JsonToken token = parser.currentToken();
                 ContextType currentCtx = ctx.peek().type;
-                if (token == JsonToken.FIELD_NAME)
+                if (token == JsonToken.PROPERTY_NAME)
                 {
-                    if ((ContextType.FIELD == currentCtx || ContextType.ARRAY == currentCtx))
+                    if ((ContextType.PROPERTY == currentCtx || ContextType.ARRAY == currentCtx))
                     {
-                        throw new IOException("JSON format error - found a field name following a '[' or field name");
+                        throw new IOException("JSON format error - found a property name following a '[' or property name");
                     }
-                    ctx.push(new ParseContext(ContextType.FIELD, parser.getText()));
+                    ctx.push(new ParseContext(ContextType.PROPERTY, parser.getString()));
                     continue;
                 }
                 if (token == JsonToken.VALUE_STRING)
                 {
-                    String value = parser.getText();
+                    String value = parser.getString();
                     if (ContextType.ARRAY == currentCtx)
                     {
                         ArrayList<Object> list = (ArrayList<Object>) ctx.peek().object;
@@ -217,11 +219,11 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
                 {
                     token = parser.nextToken();
                     // Expect the first token to be a field with the name "type"
-                    if (token != JsonToken.FIELD_NAME)
+                    if (token != JsonToken.PROPERTY_NAME)
                     {
                         throw new IOException("JSON format error - a field name was not the first item in the json object");
                     }
-                    String fieldName = parser.getText();
+                    String fieldName = parser.getString();
                     if (!"type".equals(fieldName))
                     {
                         throw new IOException("JSON format error - the type field was not the first field in the json object");
@@ -231,7 +233,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
                     {
                         throw new IOException("JSON format error - A value was not found for the type field");
                     }
-                    String className = parser.getText();
+                    String className = parser.getString();
                     AttributeCollection coll = constructAttributeCollectionObject(className);
                     ctx.push(new ParseContext(ContextType.OBJECT, coll));
                     continue;
@@ -255,7 +257,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
                             ArrayList<Object> owner = (ArrayList<Object>) ctx.peek().object;
                             owner.add(list);
                         }
-                        case FIELD ->
+                        case PROPERTY ->
                         {
                             String name = (String) ctx.pop().object;
                             currentCtx = ctx.peek().type;
@@ -296,7 +298,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
                             ArrayList<Object> owner = (ArrayList<Object>) ctx.peek().object;
                             owner.add(coll);
                         }
-                        case FIELD ->
+                        case PROPERTY ->
                         {
                             String name = (String) ctx.pop().object;
                             currentCtx = ctx.peek().type;
@@ -314,6 +316,10 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
                     }
                 }
             }
+        }
+        catch (JacksonException e)
+        {
+            throw new IOException(e.getMessage(), e);
         }
         if (props.isEmpty())
         {

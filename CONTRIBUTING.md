@@ -58,8 +58,8 @@ The project follows these conventions:
 
 ## Adding Dependencies
 
-- Keep **Jackson** on the **2.x** line
-- Keep **JUnit** on the **5.x** line
+- Keep **Jackson** on the **3.x** line
+- Keep **JUnit** on the **6.x** line
 - Check for the latest patch version of any dependency before submitting
 
 ## Submitting Changes

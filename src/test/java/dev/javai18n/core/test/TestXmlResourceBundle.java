@@ -67,7 +67,9 @@ public class TestXmlResourceBundle
                        "</properties>").getBytes());
             Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("Unexpected character combination '</' in prolog.\n at [row,col {unknown-source}]: [1,85]",
+            assertEquals("Unexpected character combination '</' in prolog.\n" +
+                " at [row,col {unknown-source}]: [1,85]\n" +
+                " at [No location information]",
                 e.getMessage());
         }
         {

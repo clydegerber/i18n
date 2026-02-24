@@ -16,7 +16,9 @@
 
 package dev.javai18n.core;
 
-import com.fasterxml.jackson.core.JsonToken;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.ObjectReadContext;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
@@ -27,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import com.fasterxml.jackson.dataformat.xml.XmlFactory;
-import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
+import tools.jackson.dataformat.xml.XmlFactory;
+import tools.jackson.dataformat.xml.deser.FromXmlParser;
 import java.util.ArrayList;
 import java.util.ArrayDeque;
 import javax.xml.stream.XMLResolver;
@@ -175,7 +177,7 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
     {
         props = new ConcurrentHashMap<>();
         XMLStreamReader xmlReader = XML_INPUT_FACTORY.createXMLStreamReader(stream, "UTF-8");
-        try (FromXmlParser parser = XML_FACTORY.createParser(xmlReader))
+        try (FromXmlParser parser = XML_FACTORY.createParser(ObjectReadContext.empty(), xmlReader))
         {
             ArrayDeque<ParseContext> ctx = new ArrayDeque<>();
             //Jackson XML parser skips the root element, so start in the PROPERTIES context
@@ -184,9 +186,9 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
             {
                 JsonToken token = parser.currentToken();
                 ContextType currentCtx = ctx.peek().type;
-                if (token == JsonToken.FIELD_NAME)
+                if (token == JsonToken.PROPERTY_NAME)
                 {
-                    String xmlName = parser.getText();
+                    String xmlName = parser.getString();
                     // Ignore version in dtd
                     if ("version".equals(xmlName))
                     {
@@ -287,7 +289,7 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
                         ctx.pop();
                         currentCtx = ctx.peek().type;
                     }
-                    String value = parser.getText();
+                    String value = parser.getString();
                     String key = null;
                     switch (currentCtx)
                     {
@@ -474,6 +476,10 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
                     }
                 }
             }
+        }
+        catch (JacksonException e)
+        {
+            throw new IOException(e.getMessage(), e);
         }
         finally
         {

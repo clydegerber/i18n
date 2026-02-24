@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.javai18n</groupId>
     <artifactId>i18n-core</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <name>i18n-core</name>
@@ -34,35 +34,35 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.13.4</version>
+            <version>6.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <groupId>tools.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.21.0</version>
+            <version>3.0.4</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.21.0</version>
+            <version>3.0.4</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.21.0</version>
+            <version>3.0.4</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-console</artifactId>
-            <version>1.13.4</version>
+            <version>6.0.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.13.4</version>
+            <version>6.0.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -126,7 +126,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.5.4</version>
+                        <version>3.5.5</version>
                         <configuration>
                             <useModulePath>false</useModulePath>
                             <argLine>-Djava.util.logging.config.file=${project.basedir}/src/test/resources/test-logging.properties</argLine>
@@ -142,7 +142,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.5.4</version>
+                        <version>3.5.5</version>
                         <configuration>
                             <skip>true</skip>
                         </configuration>
@@ -167,7 +167,7 @@
                                         
                                         <!-- Create shell script -->
                                         <echo file="${project.build.directory}/run-module-tests.sh">#!/bin/sh
-java -Djava.util.logging.config.file=${project.basedir}/src/test/resources/test-logging.properties --module-path "${full.modulepath}" --add-modules ALL-MODULE-PATH -m org.junit.platform.console --select-module dev.javai18n.core.test
+java -Djava.util.logging.config.file=${project.basedir}/src/test/resources/test-logging.properties --module-path "${full.modulepath}" --add-modules ALL-MODULE-PATH -m org.junit.platform.console execute --select-module dev.javai18n.core.test
 </echo>
                                         <chmod file="${project.build.directory}/run-module-tests.sh" perm="755"/>
                                         

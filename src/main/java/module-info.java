@@ -24,8 +24,8 @@ module dev.javai18n.core
 {
     exports dev.javai18n.core;
     requires transitive java.xml;
-    requires transitive com.fasterxml.jackson.databind;
-    requires transitive com.fasterxml.jackson.dataformat.xml;
+    requires transitive tools.jackson.databind;
+    requires transitive tools.jackson.dataformat.xml;
     uses dev.javai18n.core.spi.LocalizableLoggerProvider;
     provides dev.javai18n.core.spi.LocalizableLoggerProvider with dev.javai18n.core.spi.ModuleProviderImpl;
 }

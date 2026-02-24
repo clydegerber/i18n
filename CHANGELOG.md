@@ -4,22 +4,46 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.1]
+
+### Added
+
+- `ResourcefulDelegate` delegation helper for `Resourceful` behavior
+
+### Changed
+
+- `LocalizableLogger` constructor visibility from `private` to `protected` to
+  allow subclassing from other modules
+- Upgraded Jackson from 2.21.0 (`com.fasterxml.jackson`) to 3.0.4 (`tools.jackson`)
+- Upgraded JUnit from 5.13.4 / 1.13.4 to 6.0.3
+- Upgraded maven-surefire-plugin from 3.5.4 to 3.5.5
+- Minimum Java version is now 17 (required by Jackson 3 and JUnit 6)
+
+## [1.0.0]
 
 ### Added
 
 - `Localizable` and `Resourceful` interfaces for marking locale-sensitive
   classes and resource-dependent objects
+- `LocalizableImpl` base class implementing `Localizable`
 - `LocalizationDelegate` for polymorphic resource bundle resolution that
   mirrors class inheritance
+- `Resource` for encapsulating a `Localizable` source and string key for lookup
 - `JsonResourceBundle` for loading typed resources from JSON files
 - `XMLResourceBundle` for loading typed resources from XML files
 - `NestedResourceBundle` for composing resource bundles with parent fallback
+- `AttributeCollection` interface for typed objects in JSON/XML bundles
 - `AttributeCollectionResourceBundle` for serving `AttributeCollection`
   objects from resource bundles
 - `LocalizableLogger` for logging with localized messages
-- `AssociativeResourceBundleControl` and `AssociativeResourceBundleProvider`
-  for classpath and module-path resource bundle loading
-- `GetResourceBundleCallback` event mechanism for dynamic locale selection
+- `AssociativeResourceBundleLocator` for multi-format bundle location
+- `AssociativeResourceBundleControl` and `AssociativeResourceBundleControlProvider`
+  for classpath resource bundle loading
+- `AssociativeResourceBundleProvider` for module-path resource bundle loading
+- `GetResourceBundleCallback` and `GetResourceBundleRegistrar` for
+  cross-module bundle loading
+- `ModuleResourceBundleCallback` default `GetResourceBundleCallback` implementation
+- `ResourceStreamLoader` helper for loading resources via Modules or ClassLoaders
+- `NoCallbackRegisteredForModuleException` for missing module callback errors
 - Classpath and module-path test profiles
 - Release profile with javadoc and source jar generation

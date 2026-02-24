@@ -86,7 +86,7 @@ public class TestJsonResourceBundle
             Exception e = assertThrows(IOException.class, ()->{ new JsonResourceBundle(inputStream); },
                 "Exception not thrown");
             assertEquals("Unexpected close marker '}': no open Object to close\n" +
-                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]",
+                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); byte offset: #0]",
                 e.getMessage());
         }
         {
@@ -94,8 +94,8 @@ public class TestJsonResourceBundle
             Exception e = assertThrows(IOException.class, ()->{ new JsonResourceBundle(inputStream); },
                 "Exception not thrown");
             assertEquals("Unexpected end-of-input: expected close marker for Object (start marker at [Source: REDACTED " +
-                "(`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1])\n" +
-                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]",
+                "(`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); byte offset: #UNKNOWN])\n" +
+                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); byte offset: #1]",
                 e.getMessage());
         }
         {
@@ -109,16 +109,16 @@ public class TestJsonResourceBundle
             InputStream inputStream = new ByteArrayInputStream("{[]}".getBytes());
             Exception e = assertThrows(IOException.class, ()->{ new JsonResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("Unexpected character ('[' (code 91)): was expecting double-quote to start field name\n" +
-                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]",
+            assertEquals("Unexpected character ('[' (code 91)): was expecting double-quote to start property name\n" +
+                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); byte offset: #1]",
                 e.getMessage());
         }
         {
             InputStream inputStream = new ByteArrayInputStream("{{}}".getBytes());
             Exception e = assertThrows(IOException.class, ()->{ new JsonResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("Unexpected character ('{' (code 123)): was expecting double-quote to start field name\n" +
-                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 2]",
+            assertEquals("Unexpected character ('{' (code 123)): was expecting double-quote to start property name\n" +
+                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); byte offset: #1]",
                 e.getMessage());
         }
         {

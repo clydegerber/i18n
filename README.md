@@ -93,7 +93,7 @@ configuration are provided for module deployment.
 
 ## Requirements
 
-- Java 16 or later
+- Java 17 or later
 - Jackson Databind and Jackson Dataformat XML
   (provided as transitive dependencies)
 
@@ -105,7 +105,7 @@ configuration are provided for module deployment.
 <dependency>
     <groupId>dev.javai18n</groupId>
     <artifactId>i18n-core</artifactId>
-    <version>1.0.0</version>
+    <version>1.1</version>
 </dependency>
 ```
 
