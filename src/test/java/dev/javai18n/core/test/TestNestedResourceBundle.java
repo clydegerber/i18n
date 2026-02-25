@@ -97,7 +97,7 @@ public class TestNestedResourceBundle
     void getResourceFallbackToLanguageLocale()
     {
         LocalizableSub2  sub2 = new LocalizableSub2();
-        assertDoesNotThrow(() -> sub2.setBundleLocale(Locale.of("fr","FR")));
+        assertDoesNotThrow(() -> sub2.setBundleLocale(new Locale("fr","FR")));
         ResourceBundle frRB = assertDoesNotThrow(() -> sub2.getResourceBundle());
         String fr1 = frRB.getString("key1");
         assertEquals("Value for key1 from LocalizableSub2Bundle_fr locale.", fr1);
@@ -110,7 +110,7 @@ public class TestNestedResourceBundle
     {
         HashSet<String> expectedKeys = new HashSet<>(Arrays.asList("key1", "key2", "key3"));
         LocalizableSub2  sub2 = new LocalizableSub2();
-        assertDoesNotThrow(() -> sub2.setBundleLocale(Locale.of("fr","FR")));
+        assertDoesNotThrow(() -> sub2.setBundleLocale(new Locale("fr","FR")));
         ResourceBundle frRB = assertDoesNotThrow(() -> sub2.getResourceBundle());
         Enumeration<String> e = frRB.getKeys();
         int count = 0;
@@ -127,7 +127,7 @@ public class TestNestedResourceBundle
     void getBaseBundleName()
     {
         LocalizableSub2  sub2 = new LocalizableSub2();
-        assertDoesNotThrow(() -> sub2.setBundleLocale(Locale.of("fr","FR")));
+        assertDoesNotThrow(() -> sub2.setBundleLocale(new Locale("fr","FR")));
         NestedResourceBundle frRB = assertDoesNotThrow(() -> (NestedResourceBundle) sub2.getResourceBundle());
         assertNotNull(frRB);
         assertEquals("dev.javai18n.core.test.LocalizableSub2", frRB.getBaseBundleName());
@@ -140,7 +140,7 @@ public class TestNestedResourceBundle
     void getLocale()
     {
         LocalizableSub2  sub2 = new LocalizableSub2();
-        Locale locale = Locale.of("fr", "FR");
+        Locale locale = new Locale("fr", "FR");
         assertDoesNotThrow(() -> sub2.setBundleLocale(locale));
         NestedResourceBundle frRB = assertDoesNotThrow(() -> (NestedResourceBundle) sub2.getResourceBundle());
         assertEquals(Locale.FRENCH, frRB.getLocale());
@@ -202,7 +202,7 @@ public class TestNestedResourceBundle
     void nullKeyRaisesNullPointerException()
     {
         LocalizableSub2  sub2 = new LocalizableSub2();
-        assertDoesNotThrow(() -> sub2.setBundleLocale(Locale.of("fr","FR")));
+        assertDoesNotThrow(() -> sub2.setBundleLocale(new Locale("fr","FR")));
         ResourceBundle frRB = assertDoesNotThrow(() -> sub2.getResourceBundle());
         assertNotNull(frRB);
         Exception e = assertThrows(NullPointerException.class, ()->{ frRB.getObject(null); },

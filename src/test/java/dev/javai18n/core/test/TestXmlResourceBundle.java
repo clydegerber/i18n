@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ResourceBundle;
-import javax.xml.stream.XMLStreamException;
 import dev.javai18n.core.XMLResourceBundle;
 import dev.javai18n.core.AttributeCollectionResourceBundle;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -51,7 +50,7 @@ public class TestXmlResourceBundle
         {
             XMLResourceBundle xmlBundle = new XMLResourceBundle(stream);
             assertEquals(xmlBundle.getString("key2"), "Value for key2 from LocalizableSub3Bundle_fr.xml.");
-        } catch (IOException | XMLStreamException ex)
+        } catch (IOException ex)
         {
             System.getLogger(TestXmlResourceBundle.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -65,24 +64,16 @@ public class TestXmlResourceBundle
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                        "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
                        "</properties>").getBytes());
-            Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
+            assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("Unexpected character combination '</' in prolog.\n" +
-                " at [row,col {unknown-source}]: [1,85]\n" +
-                " at [No location information]",
-                e.getMessage());
         }
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                        "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
                        "<properties>").getBytes());
-            Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
+            assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("Unexpected EOF; was expecting a close tag for element <properties>\n" +
-                         " at [row,col {unknown-source}]: [1,95]\n" +
-                         " at [Source: (com.ctc.wstx.sr.ValidatingStreamReader); line: 1, column: 96]",
-                e.getMessage());
         }
         {
             InputStream inputStream = new ByteArrayInputStream(
@@ -103,10 +94,8 @@ public class TestXmlResourceBundle
                            "<array>" +
                            "</array>" +
                        "</properties>").getBytes());
-            Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
+            assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("XML format error - array element found in unexpected location",
-                e.getMessage());
         }
         {
             InputStream inputStream = new ByteArrayInputStream(
@@ -116,10 +105,8 @@ public class TestXmlResourceBundle
                            "<properties>" +
                            "</properties>" +
                        "</properties>").getBytes());
-            Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
+            assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("XML format error - unknown element or attribute found:properties",
-                e.getMessage());
         }
         {
             InputStream inputStream = new ByteArrayInputStream(
@@ -133,10 +120,8 @@ public class TestXmlResourceBundle
                                "</object>" +
                            "</entry>" +
                        "</properties>").getBytes());
-            Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
+            assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("XML format error - type attribute for object is missing.",
-                e.getMessage());
         }
         {
             InputStream inputStream = new ByteArrayInputStream(

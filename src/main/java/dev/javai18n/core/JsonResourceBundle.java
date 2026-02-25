@@ -16,15 +16,13 @@
 
 package dev.javai18n.core;
 
-import tools.jackson.core.json.JsonFactory;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.JsonToken;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.core.JacksonException;
-import tools.jackson.core.ObjectReadContext;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.ArrayDeque;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,34 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JsonResourceBundle  extends AttributeCollectionResourceBundle
 {
-    /**
-     * The set of possible context states that may be encountered while parsing the JSON document.
-     */
-    protected enum ContextType
-    {
-        /** The root context at the start and end of parsing. */
-        ROOT,
-        /** A JSON property name has been encountered. */
-        PROPERTY,
-        /** An array is being parsed. */
-        ARRAY,
-        /** An object is being parsed. */
-        OBJECT
-    }
-
-    /**
-     * The full context for the parsing operation. Parsing starts and ends in the ROOT state and progresses
-     * through the other states as the document is parsed. The ParseContext is maintained in a Stack and
-     * the object contained in the ParseContext is either the name of the property being parsed, the {@code ArrayList<Object>}
-     * of array elements being parsed, or the AttributeCollection object being parsed.
-     *
-     * @param type   the context type.
-     * @param object the context-specific data object.
-     */
-    protected record ParseContext(ContextType type, Object object) {}
-
-    /** The JsonFactory used to create JsonParser instances. */
-    private static final JsonFactory JSON_FACTORY = new JsonFactory();
+    /** The ObjectMapper used to parse JSON documents. */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * Constructs a JsonResourceBundle given an InputStream that provides the JSON document.
@@ -70,251 +42,13 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
     public JsonResourceBundle(InputStream stream) throws IOException
     {
         props = new ConcurrentHashMap<>();
-        try (JsonParser parser = JSON_FACTORY.createParser(ObjectReadContext.empty(), stream))
+        try
         {
-            // First token should be START_OBJECT, consume it
-            if (parser.nextToken() != JsonToken.START_OBJECT) return;
-            ArrayDeque<ParseContext> ctx = new ArrayDeque<>();
-            ctx.push(new ParseContext(ContextType.ROOT, null));
-            while (parser.nextToken() != null)
+            JsonNode root = MAPPER.readTree(stream);
+            if (!root.isObject()) return;
+            for (Map.Entry<String, JsonNode> field : root.properties())
             {
-                JsonToken token = parser.currentToken();
-                ContextType currentCtx = ctx.peek().type;
-                if (token == JsonToken.PROPERTY_NAME)
-                {
-                    if ((ContextType.PROPERTY == currentCtx || ContextType.ARRAY == currentCtx))
-                    {
-                        throw new IOException("JSON format error - found a property name following a '[' or property name");
-                    }
-                    ctx.push(new ParseContext(ContextType.PROPERTY, parser.getString()));
-                    continue;
-                }
-                if (token == JsonToken.VALUE_STRING)
-                {
-                    String value = parser.getString();
-                    if (ContextType.ARRAY == currentCtx)
-                    {
-                        ArrayList<Object> list = (ArrayList<Object>) ctx.peek().object;
-                        list.add(value);
-                    }
-                    else
-                    {
-                        String name = (String) ctx.pop().object;
-                        currentCtx = ctx.peek().type;
-                        if (ContextType.ROOT == currentCtx)
-                        {
-                            props.put(name, value);
-                        }
-                        else
-                        {
-                            AttributeCollection coll = (AttributeCollection) ctx.peek().object;
-                            coll.setAttribute(name, value);
-                        }
-                    }
-                    continue;
-                }
-                if (token == JsonToken.VALUE_NUMBER_INT)
-                {
-                    int value = parser.getIntValue();
-                    if (ContextType.ARRAY == currentCtx)
-                    {
-                        ArrayList<Object> list = (ArrayList<Object>) ctx.peek().object;
-                        list.add(value);
-                    }
-                    else
-                    {
-                        String name = (String) ctx.pop().object;
-                        currentCtx = ctx.peek().type;
-                        if (ContextType.ROOT == currentCtx)
-                        {
-                            props.put(name, value);
-                        }
-                        else
-                        {
-                            AttributeCollection coll = (AttributeCollection) ctx.peek().object;
-                            coll.setAttribute(name, value);
-                        }
-                    }
-                    continue;
-                }
-                if (token == JsonToken.VALUE_NUMBER_FLOAT)
-                {
-                    double value = parser.getDoubleValue();
-                    if (ContextType.ARRAY == currentCtx)
-                    {
-                        ArrayList<Object> list = (ArrayList<Object>) ctx.peek().object;
-                        list.add(value);
-                    }
-                    else
-                    {
-                        String name = (String) ctx.pop().object;
-                        currentCtx = ctx.peek().type;
-                        if (ContextType.ROOT == currentCtx)
-                        {
-                            props.put(name, value);
-                        }
-                        else
-                        {
-                            AttributeCollection coll = (AttributeCollection) ctx.peek().object;
-                            coll.setAttribute(name, value);
-                        }
-                    }
-                    continue;
-                }
-                if (token == JsonToken.VALUE_FALSE ||
-                    token == JsonToken.VALUE_TRUE)
-                {
-                    boolean value = parser.getBooleanValue();
-                    if (ContextType.ARRAY == currentCtx)
-                    {
-                        ArrayList<Object> list = (ArrayList<Object>) ctx.peek().object;
-                        list.add(value);
-                    }
-                    else
-                    {
-                        String name = (String) ctx.pop().object;
-                        currentCtx = ctx.peek().type;
-                        if (ContextType.ROOT == currentCtx)
-                        {
-                            props.put(name, value);
-                        }
-                        else
-                        {
-                            AttributeCollection coll = (AttributeCollection) ctx.peek().object;
-                            coll.setAttribute(name, value);
-                        }
-                    }
-                    continue;
-                }
-                if (token == JsonToken.VALUE_NULL)
-                {
-                    if (ContextType.ARRAY == currentCtx)
-                    {
-                        ArrayList<Object> list = (ArrayList<Object>) ctx.peek().object;
-                        list.add(null);
-                    }
-                    else
-                    {
-                        String name = (String) ctx.pop().object;
-                        currentCtx = ctx.peek().type;
-                        if (ContextType.ROOT == currentCtx)
-                        {
-                            props.put(name, null);
-                        }
-                        else
-                        {
-                            AttributeCollection coll = (AttributeCollection) ctx.peek().object;
-                            coll.setAttribute(name, null);
-                        }
-                    }
-                    continue;
-                }
-                if (token == JsonToken.START_ARRAY)
-                {
-                    ArrayList<Object> arrayList = new ArrayList<>();
-                    ctx.push(new ParseContext(ContextType.ARRAY, arrayList));
-                    continue;
-                }
-                if (token == JsonToken.START_OBJECT)
-                {
-                    token = parser.nextToken();
-                    // Expect the first token to be a field with the name "type"
-                    if (token != JsonToken.PROPERTY_NAME)
-                    {
-                        throw new IOException("JSON format error - a field name was not the first item in the json object");
-                    }
-                    String fieldName = parser.getString();
-                    if (!"type".equals(fieldName))
-                    {
-                        throw new IOException("JSON format error - the type field was not the first field in the json object");
-                    }
-                    token = parser.nextToken();
-                    if (token != JsonToken.VALUE_STRING)
-                    {
-                        throw new IOException("JSON format error - A value was not found for the type field");
-                    }
-                    String className = parser.getString();
-                    AttributeCollection coll = constructAttributeCollectionObject(className);
-                    ctx.push(new ParseContext(ContextType.OBJECT, coll));
-                    continue;
-                }
-                if (token == JsonToken.END_ARRAY)
-                {
-                    if (currentCtx != ContextType.ARRAY)
-                    {
-                        throw new IOException("JSON format error - Found ']' without matching '['");
-                    }
-                    Object[] list = convertToArray((ArrayList<Object>) ctx.pop().object);
-                    currentCtx = ctx.peek().type;
-                    if (null == currentCtx)
-                    {
-                        throw new IOException("JSON format error - Unexpected content after ']' ");
-                    }
-                    else switch (currentCtx)
-                    {
-                        case ARRAY ->
-                        {
-                            ArrayList<Object> owner = (ArrayList<Object>) ctx.peek().object;
-                            owner.add(list);
-                        }
-                        case PROPERTY ->
-                        {
-                            String name = (String) ctx.pop().object;
-                            currentCtx = ctx.peek().type;
-                            if (ContextType.OBJECT == currentCtx)
-                            {
-                                AttributeCollection coll = (AttributeCollection) ctx.peek().object;
-                                coll.setAttribute(name, list);
-                            }
-                            else
-                            {
-                                props.put(name, list);
-                            }
-                        }
-                        default -> throw new IOException("JSON format error - unexpected content after ']'");
-                    }
-                    continue;
-                }
-                if (token == JsonToken.END_OBJECT)
-                {
-                    if (currentCtx == ContextType.ROOT)
-                    {
-                        continue;
-                    }
-                    if (currentCtx != ContextType.OBJECT)
-                    {
-                        throw new IOException("JSON format error - found '}' without matching '{'");
-                    }
-                    AttributeCollection coll = (AttributeCollection) ctx.pop().object;
-                    currentCtx = ctx.peek().type;
-                    if (null == currentCtx)
-                    {
-                        throw new IOException("JSON format error - unexpected content after '}'");
-                    }
-                    else switch (currentCtx)
-                    {
-                        case ARRAY ->
-                        {
-                            ArrayList<Object> owner = (ArrayList<Object>) ctx.peek().object;
-                            owner.add(coll);
-                        }
-                        case PROPERTY ->
-                        {
-                            String name = (String) ctx.pop().object;
-                            currentCtx = ctx.peek().type;
-                            if (ContextType.OBJECT == currentCtx)
-                            {
-                                AttributeCollection owner = (AttributeCollection) ctx.peek().object;
-                                owner.setAttribute(name, coll);
-                            }
-                            else
-                            {
-                                props.put(name, coll);
-                            }
-                        }
-                        default -> throw new IOException("Unexpected content after '}'");
-                    }
-                }
+                props.put(field.getKey(), convertNode(field.getValue()));
             }
         }
         catch (JacksonException e)
@@ -325,6 +59,48 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
         {
             throw new IOException("Failed to parse any properties from the specified stream");
         }
+    }
+
+    /**
+     * Converts a JsonNode to the appropriate Java object.
+     *
+     * @param node the JsonNode to convert.
+     * @return the converted Java object.
+     * @throws IOException if the node contains an invalid structure.
+     */
+    private Object convertNode(JsonNode node) throws IOException
+    {
+        if (node.isString()) return node.stringValue();
+        if (node.isInt()) return node.intValue();
+        if (node.isDouble() || node.isFloat()) return node.doubleValue();
+        if (node.isBoolean()) return node.booleanValue();
+        if (node.isNull()) return null;
+        if (node.isArray())
+        {
+            ArrayList<Object> list = new ArrayList<>();
+            for (JsonNode element : node)
+            {
+                list.add(convertNode(element));
+            }
+            return convertToArray(list);
+        }
+        if (node.isObject())
+        {
+            JsonNode typeNode = node.get("type");
+            if (typeNode == null || !typeNode.isString())
+            {
+                throw new IOException("JSON format error - the type field was not the first field in the json object");
+            }
+            String className = typeNode.stringValue();
+            AttributeCollection coll = constructAttributeCollectionObject(className);
+            for (Map.Entry<String, JsonNode> field : node.properties())
+            {
+                if ("type".equals(field.getKey())) continue;
+                coll.setAttribute(field.getKey(), convertNode(field.getValue()));
+            }
+            return coll;
+        }
+        throw new IOException("JSON format error - unexpected node type: " + node.getNodeType());
     }
 
 }

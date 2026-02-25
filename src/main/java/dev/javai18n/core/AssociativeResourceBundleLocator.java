@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Locates a ResourceBundle for a given baseName and locale by appending a suffix to the baseName and searching
@@ -228,16 +227,13 @@ public class AssociativeResourceBundleLocator
      * @throws IOException
      *        if an error occurred when reading resources using
      *        any I/O operations
-     * @throws javax.xml.stream.XMLStreamException
-     *        if the XML input is not well formed
      */
     protected ResourceBundle getXmlBundle(String bundleName,
                                     Locale locale,
                                     ResourceStreamLoader streamLoader)
                             throws IllegalAccessException,
                                    InstantiationException,
-                                   IOException,
-                                   XMLStreamException
+                                   IOException
     {
         if (null == bundleName) throw new NullPointerException("baseName is null");
         if (null == locale) throw new NullPointerException("locale is null");
@@ -320,8 +316,6 @@ public class AssociativeResourceBundleLocator
      *        accessible.
      * @throws InstantiationException
      *        if the initialization provoked by this method fails.
-     * @throws javax.xml.stream.XMLStreamException
-     *        if an XML document that is not well formed is found for the baseName and locale
      * @throws IOException
      *        if an error occurred when reading resources using
      *        any I/O operations
@@ -333,8 +327,7 @@ public class AssociativeResourceBundleLocator
                                     boolean reload)
                             throws IllegalAccessException,
                                    InstantiationException,
-                                   IOException,
-                                   XMLStreamException
+                                   IOException
     {
         if (null == baseName) throw new NullPointerException("baseName is null");
         if (null == locale) throw new NullPointerException("locale is null");
@@ -368,7 +361,7 @@ public class AssociativeResourceBundleLocator
                 ResourceBundle rb = newBundle(baseName, locale, format, loader, false);
                 if (null != rb) return rb;
             }
-            catch (IllegalAccessException | InstantiationException | IOException | XMLStreamException e)
+            catch (IllegalAccessException | InstantiationException | IOException e)
             {
                 I18N_LOGGER.log(
                         System.Logger.Level.WARNING, "resource.bundle.load.error",

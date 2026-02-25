@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2]
+
+### Changed
+
+- Rewrote `JsonResourceBundle` to use Jackson's tree model (`ObjectMapper.readTree()`)
+  instead of the streaming token parser, reducing ~260 lines to ~60
+- Rewrote `XMLResourceBundle` to use the standard DOM API (`DocumentBuilder`)
+  instead of Jackson XML's streaming parser, eliminating the `jackson-dataformat-xml`
+  dependency entirely
+- `XMLResourceBundle` constructor now throws only `IOException` (previously also
+  threw `XMLStreamException`); XML parse errors are wrapped in `IOException`
+- Adapted `PropertiesDtdResolver` from `XMLResolver` to `EntityResolver` for use
+  with the DOM API
+- Restored Java 17 as the minimum compiler target (removed use of
+  `StackWalker.Option.DROP_METHOD_INFO` which required Java 22, and
+  `Locale.of()` which required Java 19)
+
+### Removed
+
+- `jackson-dataformat-xml` dependency — XML bundles now use the standard
+  `javax.xml.parsers` DOM API included in `java.xml`
+- `jackson-core` explicit dependency (transitive via `jackson-databind`)
+- `XMLStreamException` from the public API of `XMLResourceBundle`,
+  `AssociativeResourceBundleLocator`, and `AssociativeResourceBundleControl`
+
 ## [1.1]
 
 ### Added

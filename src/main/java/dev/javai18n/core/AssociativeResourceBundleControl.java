@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * A ResourceBundle.Control that uses an AssociativeResourceBundleLocator to load ResourceBundles
@@ -98,22 +97,14 @@ public class AssociativeResourceBundleControl extends Control
                                    IOException
     {
         ResourceStreamLoader streamLoader = new ResourceStreamLoader(loader);
-        ResourceBundle rb;
-        try
+        ResourceBundle rb = locator.newBundle(baseName, locale, format, streamLoader, reload);
+        if (null != rb)
         {
-            rb = locator.newBundle(baseName, locale, format, streamLoader, reload);
-            if (null != rb)
-            {
-                return rb;
-            }
-            else
-            {
-                return noSuffixLocator.newBundle(baseName, locale, format, streamLoader, reload);
-            }
+            return rb;
         }
-        catch (XMLStreamException ex)
+        else
         {
-            throw new IOException(ex.getMessage(), ex);
+            return noSuffixLocator.newBundle(baseName, locale, format, streamLoader, reload);
         }
     }
 }

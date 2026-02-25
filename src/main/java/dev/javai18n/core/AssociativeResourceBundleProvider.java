@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.spi.AbstractResourceBundleProvider;
 import java.lang.StackWalker.Option;
-import java.util.Set;
 
 /**
  * A ResourceBundleProvider that uses an AssociativeResourceBundleLocator to load ResourceBundles
@@ -31,7 +30,7 @@ import java.util.Set;
 public class AssociativeResourceBundleProvider extends AbstractResourceBundleProvider
 {
     private static final StackWalker STACK_WALKER =
-            StackWalker.getInstance(Set.of(Option.DROP_METHOD_INFO, Option.RETAIN_CLASS_REFERENCE));
+            StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
 
     AssociativeResourceBundleLocator locator;
 
