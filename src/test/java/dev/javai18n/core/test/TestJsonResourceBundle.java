@@ -46,36 +46,30 @@ public class TestJsonResourceBundle
     {
         Module module = this.getClass().getModule();
         InputStream stream = assertDoesNotThrow(() -> module.getResourceAsStream("dev/javai18n/core/test/JsonPropertiesBundle.json"));
-        try
-        {
-            JsonResourceBundle jsonBundle = new JsonResourceBundle(stream);
-            assertEquals(jsonBundle.getString("key1"), "value1");
-            assertEquals(jsonBundle.getString("key2"), "value2");
-            String [] array = jsonBundle.getStringArray("key3");
-            assertNotNull(array);
-            assertEquals(3, array.length);
-            assertEquals("value3A", array[0]);
-            assertEquals("value3B", array[1]);
-            assertEquals("value3C", array[2]);
-            SimpleAttributeCollection coll = (SimpleAttributeCollection) jsonBundle.getObject("key4");
-            SimpleAttributeCollection expectedColl = new SimpleAttributeCollection("My name", "My value");
-            assertEquals(coll, expectedColl);
-            assertEquals(jsonBundle.getString("key5"), "value5");
-            Object [] objArray = (Object[]) jsonBundle.getObject("key6");
-            assertEquals(3, objArray.length);
-            SimpleAttributeCollection collA = new SimpleAttributeCollection("My nameA", "My valueA");
-            SimpleAttributeCollection collB = new SimpleAttributeCollection("My nameB", "My valueB");
-            SimpleAttributeCollection collC = new SimpleAttributeCollection("My nameC", "My valueC");
-            SimpleAttributeCollection objA = (SimpleAttributeCollection) objArray[0];
-            SimpleAttributeCollection objB = (SimpleAttributeCollection) objArray[1];
-            SimpleAttributeCollection objC = (SimpleAttributeCollection) objArray[2];
-            assertEquals(collA, objA);
-            assertEquals(collB, objB);
-            assertEquals(collC, objC);
-        } catch (IOException ex)
-        {
-            System.getLogger(TestJsonResourceBundle.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
+        JsonResourceBundle jsonBundle = assertDoesNotThrow(() -> new JsonResourceBundle(stream));
+        assertEquals(jsonBundle.getString("key1"), "value1");
+        assertEquals(jsonBundle.getString("key2"), "value2");
+        String [] array = jsonBundle.getStringArray("key3");
+        assertNotNull(array);
+        assertEquals(3, array.length);
+        assertEquals("value3A", array[0]);
+        assertEquals("value3B", array[1]);
+        assertEquals("value3C", array[2]);
+        SimpleAttributeCollection coll = (SimpleAttributeCollection) jsonBundle.getObject("key4");
+        SimpleAttributeCollection expectedColl = new SimpleAttributeCollection("My name", "My value");
+        assertEquals(coll, expectedColl);
+        assertEquals(jsonBundle.getString("key5"), "value5");
+        Object [] objArray = (Object[]) jsonBundle.getObject("key6");
+        assertEquals(3, objArray.length);
+        SimpleAttributeCollection collA = new SimpleAttributeCollection("My nameA", "My valueA");
+        SimpleAttributeCollection collB = new SimpleAttributeCollection("My nameB", "My valueB");
+        SimpleAttributeCollection collC = new SimpleAttributeCollection("My nameC", "My valueC");
+        SimpleAttributeCollection objA = (SimpleAttributeCollection) objArray[0];
+        SimpleAttributeCollection objB = (SimpleAttributeCollection) objArray[1];
+        SimpleAttributeCollection objC = (SimpleAttributeCollection) objArray[2];
+        assertEquals(collA, objA);
+        assertEquals(collB, objB);
+        assertEquals(collC, objC);
     }
 
     @Test
@@ -126,7 +120,7 @@ public class TestJsonResourceBundle
                 "{\"key1\": {\"name\": \"My name\", \"value\": \"My value\"}}".getBytes());
             Exception e = assertThrows(IOException.class, ()->{ new JsonResourceBundle(inputStream); },
                 "Exception not thrown");
-            assertEquals("JSON format error - the type field was not the first field in the json object",
+            assertEquals("JSON format error - object is missing a 'type' field or type is not a string",
                 e.getMessage());
         }
         {

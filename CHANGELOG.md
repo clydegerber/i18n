@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.1]
+
+### Changed
+
+- `GetResourceBundleRegistrar.registerCallbackForModule()`: replaced `synchronized(map)`
+  with `ConcurrentHashMap.putIfAbsent()` to avoid defeating the lock-free design
+- `LocalizationDelegate`: replaced `synchronized(lock)` with `ReentrantReadWriteLock`
+  so read-heavy methods (`getBundleLocale()`, `getResourceBundle()`) no longer contend
+  with writes
+- `LocalizableLogger.getAvailableLocales()`: made the locale array `static final` and
+  removed the defensive `clone()`, eliminating an allocation on every call
+- `NestedResourceBundle`: replaced `Enumeration`-based iteration in `getKeys()` and
+  `handleKeySet()` with bulk `keySet()` / `addAll()` operations; added `keySet()`
+  override to include superBundle keys
+- `AttributeCollectionResourceBundle.getKeys()`: replaced `Enumeration`-based iteration
+  with `props.keySet()` / `parent.keySet()` and bulk `addAll()`
+- `AttributeCollectionResourceBundle.constructAttributeCollectionObject()`: cached
+  validated `Constructor` instances in a `ConcurrentHashMap` to avoid repeated
+  reflection; extracted `resolveConstructor()` method
+- `XMLResourceBundle.PropertiesDtdResolver`: refactored to follow HTTP redirects across
+  hosts/protocols when fetching the Sun properties DTD; falls back to local DTD on
+  network failure instead of throwing
+- `JsonResourceBundle`: improved error messages for invalid JSON structure (non-object
+  root, missing type field)
+
+### Fixed
+
+- `XMLResourceBundle.PropertiesDtdResolver`: unrecognized DTD system IDs are now blocked
+  to prevent XXE attacks (previously only null system IDs were blocked)
+- `README.md`: fixed typo in API Reference table (`AssociateResourceBundleLocator` →
+  `AssociativeResourceBundleLocator`)
+
 ## [1.2]
 
 ### Changed

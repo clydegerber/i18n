@@ -45,7 +45,10 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
         try
         {
             JsonNode root = MAPPER.readTree(stream);
-            if (!root.isObject()) return;
+            if (!root.isObject())
+            {
+                throw new IOException("JSON root is not an object");
+            }
             for (Map.Entry<String, JsonNode> field : root.properties())
             {
                 props.put(field.getKey(), convertNode(field.getValue()));
@@ -89,7 +92,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
             JsonNode typeNode = node.get("type");
             if (typeNode == null || !typeNode.isString())
             {
-                throw new IOException("JSON format error - the type field was not the first field in the json object");
+                throw new IOException("JSON format error - object is missing a 'type' field or type is not a string");
             }
             String className = typeNode.stringValue();
             AttributeCollection coll = constructAttributeCollectionObject(className);

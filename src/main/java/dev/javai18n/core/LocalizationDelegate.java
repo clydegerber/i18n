@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A Class that objects that implement the Localizable interface can embed and to which they can delegate
@@ -74,7 +75,9 @@ public class LocalizationDelegate
      */
     public Locale getBundleLocale()
     {
-        synchronized (lock) { return locale; }
+        rwLock.readLock().lock();
+        try { return locale; }
+        finally { rwLock.readLock().unlock(); }
     }
 
     /**
@@ -87,12 +90,14 @@ public class LocalizationDelegate
     public void setBundleLocale(Locale locale)
     {
         LocaleEventListener[] snapshot;
-        synchronized (lock)
+        rwLock.writeLock().lock();
+        try
         {
             this.locale = locale;
             rb = getNestedResourceBundle();
             snapshot = listeners.toArray(LocaleEventListener[]::new);
         }
+        finally { rwLock.writeLock().unlock(); }
         LocaleEvent event = new LocaleEvent(localizedObject);
         for (LocaleEventListener listener : snapshot)
         {
@@ -119,11 +124,19 @@ public class LocalizationDelegate
      */
     public ResourceBundle getResourceBundle()
     {
-        synchronized (lock)
+        rwLock.readLock().lock();
+        try
+        {
+            if (null != rb) return rb;
+        }
+        finally { rwLock.readLock().unlock(); }
+        rwLock.writeLock().lock();
+        try
         {
             if (null == rb) rb = getNestedResourceBundle();
             return rb;
         }
+        finally { rwLock.writeLock().unlock(); }
     }
 
     /**
@@ -184,16 +197,18 @@ public class LocalizationDelegate
      */
     public void updateResourceBundle()
     {
-        synchronized (lock)
+        rwLock.writeLock().lock();
+        try
         {
             rb = getNestedResourceBundle();
         }
+        finally { rwLock.writeLock().unlock(); }
     }
 
     /**
      * Lock guarding {@code locale}, {@code rb}, and {@code listeners}.
      */
-    private final Object lock = new Object();
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     /**
      * The set of LocaleEventListeners.
@@ -208,10 +223,12 @@ public class LocalizationDelegate
      */
     public void addLocaleEventListener(LocaleEventListener listener)
     {
-        synchronized (lock)
+        rwLock.writeLock().lock();
+        try
         {
             listeners.add(listener);
         }
+        finally { rwLock.writeLock().unlock(); }
     }
 
     /**
@@ -222,10 +239,12 @@ public class LocalizationDelegate
      */
     public void removeLocaleEventListener(LocaleEventListener listener)
     {
-        synchronized (lock)
+        rwLock.writeLock().lock();
+        try
         {
             listeners.remove(listener);
         }
+        finally { rwLock.writeLock().unlock(); }
     }
 
     /**

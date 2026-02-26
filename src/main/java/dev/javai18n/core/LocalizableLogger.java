@@ -57,7 +57,7 @@ public class LocalizableLogger implements Localizable, System.Logger
     /**
      * The locales supported by this logger.
      */
-    protected Locale[] availableLocales =
+    private static final Locale[] AVAILABLE_LOCALES =
     {
         Locale.ROOT,
         Locale.ENGLISH,
@@ -143,7 +143,7 @@ public class LocalizableLogger implements Localizable, System.Logger
     @Override
     public Locale[] getAvailableLocales()
     {
-        return availableLocales.clone();
+        return AVAILABLE_LOCALES;
     }
 
     /**

@@ -57,21 +57,19 @@ public class GetResourceBundleRegistrar
     protected void registerCallbackForModule(GetResourceBundleCallback callback)
     {
         Module module = callback.getClass().getModule();
-        synchronized(map)
+        if (!moduleMode)
         {
-            if (!moduleMode && !map.isEmpty())
-            {
-                //First registration wins when running on the classpath.
-                return;
-            }
-            GetResourceBundleCallback existing = map.get(module);
-            if (null != existing && existing != callback)
-            {
-                throw new IllegalStateException(
-                    "A different GetResourceBundleCallback is already registered for module " +
-                    module.getName());
-            }
-            map.put(module, callback);
+            // Classpath mode: first registration wins (all classes share the unnamed module)
+            map.putIfAbsent(module, callback);
+            return;
+        }
+        // Module mode: allow registration, reject conflicting callbacks for the same module
+        GetResourceBundleCallback existing = map.putIfAbsent(module, callback);
+        if (null != existing && existing != callback)
+        {
+            throw new IllegalStateException(
+                "A different GetResourceBundleCallback is already registered for module " +
+                module.getName());
         }
     }
 

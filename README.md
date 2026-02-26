@@ -104,7 +104,7 @@ configuration are provided for module deployment.
 <dependency>
     <groupId>dev.javai18n</groupId>
     <artifactId>i18n-core</artifactId>
-    <version>1.2</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
@@ -459,7 +459,7 @@ Editorial comment: The ResourceBundleProvider spi doesn't strike one as elegant 
 | `AttributeCollection` | Interface for typed objects from JSON/XML entries |
 | `AttributeCollectionResourceBundle` | Base for JSON/XML bundles |
 | `AssociativeResourceBundleLocator` | Multi-format bundle locator |
-| `AssociativeResourceBundleControl` | `ResourceBundle.Control` using `AssociateResourceBundleLocator` |
+| `AssociativeResourceBundleControl` | `ResourceBundle.Control` using `AssociativeResourceBundleLocator` |
 | `AssociativeResourceBundleControlProvider` | `ResourceBundleControlProvider` using `AssociativeResourceBundleControl` |
 | `AssociativeResourceBundleProvider` | A `ResourceBundleProvider` implementation for modular environments |
 | `GetResourceBundleCallback` | Interface for cross-module bundle loading |

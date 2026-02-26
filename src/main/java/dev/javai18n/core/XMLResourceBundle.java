@@ -20,9 +20,9 @@ import static dev.javai18n.core.LocalizableLogger.I18N_LOGGER;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.DocumentBuilder;
@@ -47,8 +47,16 @@ import org.xml.sax.SAXParseException;
 public class XMLResourceBundle  extends AttributeCollectionResourceBundle
 {
     /**
-     * An EntityResolver that resolves the properties DTD from this module's resources (dev/javai18n/core/properties.dtd)
-     * or from https://java.sun.com/dtd/properties.dtd.
+     * An EntityResolver that resolves the properties DTD. Recognized system IDs are:
+     * <ul>
+     *   <li>{@code http://java.sun.com/dtd/properties.dtd} and
+     *       {@code https://java.sun.com/dtd/properties.dtd} — fetched from the
+     *       Sun/Oracle server (with caching and redirect following). If the fetch
+     *       fails, falls back to the local module resource.</li>
+     *   <li>{@code properties.dtd} and {@code dev/javai18n/core/properties.dtd} — resolved
+     *       to the local module resource, which is a superset of the Sun DTD.</li>
+     * </ul>
+     * All other system IDs are blocked to prevent XXE attacks.
      */
     protected static final class PropertiesDtdResolver implements EntityResolver
     {
@@ -59,9 +67,12 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
         PropertiesDtdResolver() {}
         private static final String SUN_DTD_HTTPS = "https://java.sun.com/dtd/properties.dtd";
         private static final String SUN_DTD_HTTP = "http://java.sun.com/dtd/properties.dtd";
+        private static final String LOCAL_DTD_PATH = "dev/javai18n/core/properties.dtd";
+        private static final String LOCAL_DTD_NAME = "properties.dtd";
         private static final int TIMEOUT_MS = 5000;
+        private static final int MAX_REDIRECTS = 5;
 
-        /** The Sun properties DTD. */
+        /** The Sun properties DTD, cached after first successful fetch. */
         private static volatile byte[] cachedSunDtd;
 
         @Override
@@ -72,41 +83,120 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
             {
                 throw new SAXException("Resolution of external entity blocked: null systemID");
             }
-            if (systemID.endsWith("properties.dtd"))
-            {
-                InputStream dtdStream = PropertiesDtdResolver.class.getModule()
-                        .getResourceAsStream("dev/javai18n/core/properties.dtd");
-                if (null == dtdStream)
-                {
-                    throw new SAXException("Local properties DTD not found");
-                }
-                return new InputSource(dtdStream);
-            }
             if (systemID.equals(SUN_DTD_HTTP) || systemID.equals(SUN_DTD_HTTPS))
             {
-                byte[] dtd = cachedSunDtd;
-                if (null == dtd)
-                {
-                    try
-                    {
-                        URL dtdUrl = URI.create(SUN_DTD_HTTPS).toURL();
-                        URLConnection conn = dtdUrl.openConnection();
-                        conn.setConnectTimeout(TIMEOUT_MS);
-                        conn.setReadTimeout(TIMEOUT_MS);
-                        try (InputStream dtdStream = conn.getInputStream())
-                        {
-                            dtd = dtdStream.readAllBytes();
-                            cachedSunDtd = dtd;
-                        }
-                    }
-                    catch (IOException ex)
-                    {
-                        throw new SAXException("Failed to fetch Sun properties DTD: " + ex.getMessage(), ex);
-                    }
-                }
-                return new InputSource(new ByteArrayInputStream(dtd));
+                return resolveSunDtd();
+            }
+            if (isLocalPropertiesDtd(systemID))
+            {
+                return resolveLocalDtd();
             }
             throw new SAXException("Resolution of external entity blocked: " + systemID);
+        }
+
+        /**
+         * Fetches the Sun properties DTD from the network, following redirects.
+         * Falls back to the local DTD on any failure.
+         *
+         * @return an InputSource for the Sun DTD, or the local DTD as fallback.
+         * @throws SAXException if neither the Sun DTD nor the local DTD can be loaded.
+         */
+        private static InputSource resolveSunDtd() throws SAXException, IOException
+        {
+            byte[] dtd = cachedSunDtd;
+            if (null != dtd)
+            {
+                return new InputSource(new ByteArrayInputStream(dtd));
+            }
+            try
+            {
+                dtd = fetchWithRedirects(SUN_DTD_HTTPS);
+                cachedSunDtd = dtd;
+                return new InputSource(new ByteArrayInputStream(dtd));
+            }
+            catch (IOException ex)
+            {
+                I18N_LOGGER.log(System.Logger.Level.DEBUG, "resource.bundle.load.error",
+                        ex.getClass().getName(), SUN_DTD_HTTPS, "", ex);
+                return resolveLocalDtd();
+            }
+        }
+
+        /**
+         * Fetches content from a URL, manually following redirects across
+         * hosts and protocols (which {@code HttpURLConnection} does not do
+         * by default).
+         */
+        private static byte[] fetchWithRedirects(String urlString) throws IOException
+        {
+            for (int i = 0; i < MAX_REDIRECTS; i++)
+            {
+                URL url = URI.create(urlString).toURL();
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(TIMEOUT_MS);
+                conn.setReadTimeout(TIMEOUT_MS);
+                conn.setInstanceFollowRedirects(false);
+                int status = conn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_OK)
+                {
+                    try (InputStream stream = conn.getInputStream())
+                    {
+                        return stream.readAllBytes();
+                    }
+                }
+                if (status == HttpURLConnection.HTTP_MOVED_PERM ||
+                    status == HttpURLConnection.HTTP_MOVED_TEMP ||
+                    status == HttpURLConnection.HTTP_SEE_OTHER ||
+                    status == 307 || status == 308)
+                {
+                    String location = conn.getHeaderField("Location");
+                    if (null == location)
+                    {
+                        throw new IOException("Redirect with no Location header from " + urlString);
+                    }
+                    urlString = location;
+                    continue;
+                }
+                throw new IOException("HTTP " + status + " from " + urlString);
+            }
+            throw new IOException("Too many redirects fetching Sun properties DTD");
+        }
+
+        /**
+         * Resolves the local properties DTD from the module's resources.
+         *
+         * @return an InputSource for the local DTD.
+         * @throws SAXException if the local DTD resource cannot be found.
+         */
+        private static InputSource resolveLocalDtd() throws SAXException, IOException
+        {
+            InputStream dtdStream = PropertiesDtdResolver.class.getModule()
+                    .getResourceAsStream(LOCAL_DTD_PATH);
+            if (null == dtdStream)
+            {
+                throw new SAXException("Local properties DTD not found");
+            }
+            return new InputSource(dtdStream);
+        }
+
+        /**
+         * Returns {@code true} if the system ID identifies the local properties DTD.
+         * Matches the relative forms ({@code "properties.dtd"} and
+         * {@code "dev/javai18n/core/properties.dtd"}) as well as absolute {@code file://}
+         * URIs that the DOM parser produces when resolving relative system IDs.
+         */
+        private static boolean isLocalPropertiesDtd(String systemID)
+        {
+            if (systemID.equals(LOCAL_DTD_NAME) || systemID.equals(LOCAL_DTD_PATH))
+            {
+                return true;
+            }
+            if (systemID.startsWith("file:"))
+            {
+                return systemID.endsWith("/" + LOCAL_DTD_NAME) ||
+                       systemID.endsWith("/" + LOCAL_DTD_PATH);
+            }
+            return false;
         }
     }
 

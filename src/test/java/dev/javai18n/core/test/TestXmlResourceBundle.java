@@ -46,14 +46,8 @@ public class TestXmlResourceBundle
     {
         Module module = this.getClass().getModule();
         InputStream stream = assertDoesNotThrow(() -> module.getResourceAsStream("dev/javai18n/core/test/LocalizableSub3Bundle_fr.xml"));
-        try
-        {
-            XMLResourceBundle xmlBundle = new XMLResourceBundle(stream);
-            assertEquals(xmlBundle.getString("key2"), "Value for key2 from LocalizableSub3Bundle_fr.xml.");
-        } catch (IOException ex)
-        {
-            System.getLogger(TestXmlResourceBundle.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-        }
+        XMLResourceBundle xmlBundle = assertDoesNotThrow(() -> new XMLResourceBundle(stream));
+        assertEquals(xmlBundle.getString("key2"), "Value for key2 from LocalizableSub3Bundle_fr.xml.");
     }
 
     @Test
@@ -283,6 +277,24 @@ public class TestXmlResourceBundle
         AttributeCollectionWithStringArray coll = (AttributeCollectionWithStringArray) xmlBundle.getObject("My Object");
         String[] array = coll.getValues();
         assertEquals(3, array.length);
+    }
+
+    /**
+     * Tests that an unrecognized DTD system ID is blocked by the EntityResolver.
+     */
+    @Test
+    public void testUnrecognizedDtdSystemIdBlocked()
+    {
+        InputStream inputStream = new ByteArrayInputStream(
+                  ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                   "<!DOCTYPE properties SYSTEM \"http://evil.com/malicious.dtd\">" +
+                   "<properties>" +
+                       "<entry key='key1'>value1</entry>" +
+                   "</properties>").getBytes());
+        Exception e = assertThrows(IOException.class, () -> { new XMLResourceBundle(inputStream); },
+                "Exception not thrown");
+        assertEquals("Resolution of external entity blocked: http://evil.com/malicious.dtd",
+                e.getMessage());
     }
 
     @Test

@@ -62,6 +62,12 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
     }
 
     /**
+     * Cache of validated Constructor instances, keyed by fully qualified class name.
+     */
+    private static final ConcurrentHashMap<String, Constructor<?>> constructorCache =
+        new ConcurrentHashMap<>();
+
+    /**
      * The HashMap that contains the resource keys and values.
      */
     protected ConcurrentHashMap<String, Object> props;
@@ -81,6 +87,7 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
      */
     protected AttributeCollection constructAttributeCollectionObject(String className) throws IOException
     {
+        // Security check on every call
         int lastDot = className.lastIndexOf('.');
         if (lastDot < 0 || !allowedPackages.contains(className.substring(0, lastDot)))
         {
@@ -88,7 +95,27 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
             I18N_LOGGER.log(System.Logger.Level.ERROR, "class.not.in.registered.package", className, ex);
             throw ex;
         }
-        AttributeCollection coll;
+        Constructor<?> ctor = constructorCache.get(className);
+        if (null == ctor)
+        {
+            ctor = resolveConstructor(className);
+            constructorCache.putIfAbsent(className, ctor);
+        }
+        try
+        {
+            return (AttributeCollection) ctor.newInstance((Object[]) null);
+        }
+        catch (IllegalAccessException | IllegalArgumentException |
+               InstantiationException | InvocationTargetException ex)
+        {
+            I18N_LOGGER.log(System.Logger.Level.DEBUG, "failed.to.instantiate",
+                className, ex.getClass().getName(), ex);
+            throw new IOException("Failed to construct AttributeCollection object", ex);
+        }
+    }
+
+    private Constructor<?> resolveConstructor(String className) throws IOException
+    {
         ClassLoader loader = this.getClass().getClassLoader();
         Class<?> c;
         try
@@ -118,15 +145,7 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
             I18N_LOGGER.log(System.Logger.Level.DEBUG, "constructor.not.public", className);
             throw new IOException("Failed to construct AttributeCollection object");
         }
-        try
-        {
-            coll = (AttributeCollection) ctor.newInstance((Object[]) null);
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | InvocationTargetException ex)
-        {
-            I18N_LOGGER.log(System.Logger.Level.DEBUG, "failed.to.instantiate", className, ex.getClass().getName(), ex);
-            throw new IOException("Failed to construct AttributeCollection object", ex);
-        }
-        return coll;
+        return ctor;
     }
 
     /**
@@ -174,19 +193,10 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
     @Override
     public Enumeration<String> getKeys()
     {
-        HashSet<String> keys = new HashSet<>();
+        Set<String> keys = new HashSet<>(props.keySet());
         if (null != parent)
         {
-            Enumeration<String> e = parent.getKeys();
-            while (e.hasMoreElements())
-            {
-                keys.add(e.nextElement());
-            }
-        }
-        Enumeration<String> myKeys = props.keys();
-        while (myKeys.hasMoreElements())
-        {
-            keys.add(myKeys.nextElement());
+            keys.addAll(parent.keySet());
         }
         return Collections.enumeration(keys);
     }

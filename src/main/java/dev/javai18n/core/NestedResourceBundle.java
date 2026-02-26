@@ -145,6 +145,28 @@ public class NestedResourceBundle extends ResourceBundle
     }
 
     /**
+     * Returns a Set of all keys contained in this NestedResourceBundle, its parent bundles,
+     * and the higher levels in the nesting hierarchy.
+     *
+     * @return a Set of all keys contained in this NestedResourceBundle, its parent bundles,
+     *         and the higher levels in the nesting hierarchy.
+     */
+    @Override
+    public Set<String> keySet()
+    {
+        Set<String> keys = new HashSet<>(handleKeySet());
+        if (null != parent)
+        {
+            keys.addAll(parent.keySet());
+        }
+        if (null != superBundle)
+        {
+            keys.addAll(superBundle.keySet());
+        }
+        return Collections.unmodifiableSet(keys);
+    }
+
+    /**
      * Returns an enumeration of the keys.
      *
      * @return an Enumeration of the keys contained in this NestedResourceBundle and its parent
@@ -153,44 +175,22 @@ public class NestedResourceBundle extends ResourceBundle
     @Override
     public Enumeration<String> getKeys()
     {
-        Set<String> keys = handleKeySet();
-        if (null != parent)
-        {
-            Enumeration<String> e = parent.getKeys();
-            while (e.hasMoreElements())
-            {
-                keys.add(e.nextElement());
-            }
-        }
-        if (null != superBundle)
-        {
-            Enumeration<String> e = superBundle.getKeys();
-            while (e.hasMoreElements())
-            {
-                keys.add(e.nextElement());
-            }
-        }
-        return Collections.enumeration(keys);
+        return Collections.enumeration(keySet());
     }
 
     /**
-     * Returns a Set of all keys contained in this NestedResourceBundle and its parent bundles.
+     * Returns a Set of all keys contained in this NestedResourceBundle's delegate.
      *
-     * @return a Set of all keys contained in this NestedResourceBundle and its parent bundles.
+     * @return a Set of all keys contained in this NestedResourceBundle's delegate.
      */
     @Override
     protected Set<String> handleKeySet()
     {
-        Set<String> keys = new HashSet<>();
         if (null != delegate)
         {
-            Enumeration<String> e = delegate.getKeys();
-            while (e.hasMoreElements())
-            {
-                keys.add(e.nextElement());
-            }
+            return new HashSet<>(delegate.keySet());
         }
-        return keys;
+        return new HashSet<>();
     }
 
     /**
