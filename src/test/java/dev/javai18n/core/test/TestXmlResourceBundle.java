@@ -19,6 +19,7 @@ package dev.javai18n.core.test;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import dev.javai18n.core.XMLResourceBundle;
 import dev.javai18n.core.AttributeCollectionResourceBundle;
@@ -37,8 +38,7 @@ public class TestXmlResourceBundle
     @BeforeAll
     public static void registerTypes()
     {
-        AttributeCollectionResourceBundle.registerAttributeCollectionPackage(
-            SimpleAttributeCollection.class.getPackageName());
+        I18NTestModuleRegistrar.ensureRegistered();
     }
 
     @Test
@@ -56,7 +56,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "</properties>").getBytes());
             assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
@@ -64,7 +64,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>").getBytes());
             assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
                 "Exception not thrown");
@@ -72,7 +72,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                        "</properties>").getBytes());
             Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
@@ -83,7 +83,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<array>" +
                            "</array>" +
@@ -94,7 +94,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<properties>" +
                            "</properties>" +
@@ -105,7 +105,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<object>" +
@@ -120,7 +120,7 @@ public class TestXmlResourceBundle
         {
             InputStream inputStream = new ByteArrayInputStream(
                       ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<object type='foo'>" +
@@ -140,7 +140,7 @@ public class TestXmlResourceBundle
     public void testNestedObject()
     {
         String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<object type='dev.javai18n.core.test.NestedAttributeCollection'>" +
@@ -167,7 +167,7 @@ public class TestXmlResourceBundle
     public void testNestedArray()
     {
         String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<array>" +
@@ -195,7 +195,7 @@ public class TestXmlResourceBundle
     public void testNumericValues()
     {
         String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<object type='dev.javai18n.core.test.NumericValueAttributeCollection'>" +
@@ -215,7 +215,7 @@ public class TestXmlResourceBundle
     public void testBooleanValues()
     {
         String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<object type='dev.javai18n.core.test.NumericValueAttributeCollection'>" +
@@ -237,7 +237,7 @@ public class TestXmlResourceBundle
     public void testNullValues()
     {
         String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='key1'>" +
                                "<object type='dev.javai18n.core.test.NumericValueAttributeCollection'>" +
@@ -256,7 +256,7 @@ public class TestXmlResourceBundle
     public void testObjectWithArrayField()
     {
         String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                       "<!DOCTYPE properties SYSTEM \"properties.dtd\">" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
                        "<properties>" +
                            "<entry key='My Object'>" +
                                "<object type='dev.javai18n.core.test.AttributeCollectionWithStringArray'>" +
@@ -295,6 +295,21 @@ public class TestXmlResourceBundle
                 "Exception not thrown");
         assertEquals("Resolution of external entity blocked: http://evil.com/malicious.dtd",
                 e.getMessage());
+    }
+
+    @Test
+    public void testSubstitutionVariable()
+    {
+        String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
+                       "<properties>" +
+                           "<entry key='message'>Hello, {0}! You have {1} messages.</entry>" +
+                       "</properties>";
+        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
+        XMLResourceBundle xmlBundle = assertDoesNotThrow(() -> new XMLResourceBundle(inputStream));
+        String pattern = xmlBundle.getString("message");
+        String result = MessageFormat.format(pattern, "World", 3);
+        assertEquals("Hello, World! You have 3 messages.", result);
     }
 
     @Test

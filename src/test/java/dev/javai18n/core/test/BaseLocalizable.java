@@ -16,7 +16,6 @@
 
 package dev.javai18n.core.test;
 
-import dev.javai18n.core.GetResourceBundleRegistrar;
 import dev.javai18n.core.LocalizableImpl;
 
 /**
@@ -26,6 +25,6 @@ public class BaseLocalizable extends LocalizableImpl
 {
     static
     {
-        GetResourceBundleRegistrar.registerGetResourceBundleCallback(ModuleResourceBundleCallback.GET_BUNDLE_CALLBACK);
+        I18NTestModuleRegistrar.ensureRegistered();
     }
 }

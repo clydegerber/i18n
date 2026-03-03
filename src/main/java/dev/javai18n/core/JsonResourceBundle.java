@@ -26,7 +26,99 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A ResourceBundle that is loaded from a JSON document.
+ * A {@link ResourceBundle} loaded from a JSON document.
+ *
+ * <h2>Document structure</h2>
+ * <p>The root of the JSON document must be a JSON object. Each field of the root object becomes
+ * a bundle entry whose key is the field name. Values may be:</p>
+ * <ul>
+ *   <li><b>String</b> — retrieved via {@link ResourceBundle#getString(String)}</li>
+ *   <li><b>Number</b> — stored as {@code int}, {@code double}, or {@code float}; retrieved via
+ *       {@link ResourceBundle#getObject(String)}</li>
+ *   <li><b>Boolean</b> — stored as {@code boolean}; retrieved via
+ *       {@link ResourceBundle#getObject(String)}</li>
+ *   <li><b>Array</b> — stored as {@code String[]} when all elements are strings, otherwise as
+ *       {@code Object[]}; retrieved via {@link ResourceBundle#getStringArray(String)} or
+ *       {@link ResourceBundle#getObject(String)}</li>
+ *   <li><b>Object</b> — deserialized into an {@link AttributeCollection}; retrieved via
+ *       {@link ResourceBundle#getObject(String)}</li>
+ * </ul>
+ *
+ * <h2>String-only bundle</h2>
+ * <p>A bundle containing string entries and a string array:</p>
+ * <pre>{@code
+ * {
+ *   "greeting": "Hello",
+ *   "farewell": "Goodbye",
+ *   "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+ * }
+ * }</pre>
+ *
+ * <h2>Bundle containing typed objects</h2>
+ * <p>A JSON object value is deserialized into an {@link AttributeCollection}. The object must
+ * contain a {@code "type"} field whose value is the fully qualified class name of the target
+ * type. The remaining fields are passed to the instance via
+ * {@link AttributeCollection#setAttribute(String, Object)}, one call per field.</p>
+ *
+ * <p>Given the following {@code AttributeCollection} implementation:</p>
+ * <pre>{@code
+ * package com.example;
+ *
+ * public class ButtonProps implements AttributeCollection {
+ *     private String label;
+ *     private String tooltip;
+ *
+ *     public ButtonProps() {}  // public no-arg constructor required
+ *
+ *     public String getLabel()   { return label; }
+ *     public String getTooltip() { return tooltip; }
+ *
+ *     @Override
+ *     public void setAttribute(String name, Object value) {
+ *         switch (name) {
+ *             case "label"   -> label   = (String) value;
+ *             case "tooltip" -> tooltip = (String) value;
+ *         }
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p>…a bundle that includes a string entry and an object entry for it looks like:</p>
+ * <pre>{@code
+ * {
+ *   "title": "File Explorer",
+ *   "okButton": {
+ *     "type": "com.example.ButtonProps",
+ *     "label": "OK",
+ *     "tooltip": "Confirm the selection"
+ *   }
+ * }
+ * }</pre>
+ *
+ * <p>The object is then retrieved and cast:</p>
+ * <pre>{@code
+ * ButtonProps ok = (ButtonProps) bundle.getObject("okButton");
+ * }</pre>
+ *
+ * <h3>Package registration</h3>
+ * <p>As a security measure, only classes whose package has been explicitly registered may be
+ * instantiated. Attempting to deserialize an object whose class belongs to an unregistered
+ * package throws {@link java.io.IOException}. Packages are registered once — typically at
+ * application or module startup — before any bundle containing objects in that package is
+ * loaded:</p>
+ * <pre>{@code
+ * AttributeCollectionResourceBundle.registerAttributeCollectionPackage("com.example");
+ * }</pre>
+ *
+ * <h3>No-arg constructor requirement</h3>
+ * <p>The target class must have a {@code public} no-argument constructor. The bundle loader
+ * instantiates the object via that constructor and then populates it by calling
+ * {@link AttributeCollection#setAttribute(String, Object)} for each non-{@code "type"} field
+ * in the JSON object.</p>
+ *
+ * @see XMLResourceBundle
+ * @see AttributeCollection
+ * @see AttributeCollectionResourceBundle#registerAttributeCollectionPackage(String)
  */
 public class JsonResourceBundle  extends AttributeCollectionResourceBundle
 {

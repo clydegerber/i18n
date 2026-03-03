@@ -26,12 +26,9 @@ import java.util.function.Supplier;
  */
 public class LocalizableLogger implements Localizable, System.Logger
 {
-    /**
-     * Register the callback.
-     */
     static
     {
-        GetResourceBundleRegistrar.registerGetResourceBundleCallback(ModuleResourceBundleCallback.GET_BUNDLE_CALLBACK);
+        I18NModuleRegistrar.ensureRegistered();
     }
 
     /**

@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import dev.javai18n.core.Localizable.LocaleEvent;
 import dev.javai18n.core.Localizable.LocaleEventListener;
 import dev.javai18n.core.LocalizableLogger;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import org.junit.jupiter.api.Test;
@@ -232,5 +233,84 @@ public class TestLocalizableLogger
         LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.log.loggable");
         // isLoggable returns a boolean without throwing; actual value depends on JUL config
         assertDoesNotThrow(() -> logger.isLoggable(System.Logger.Level.ERROR));
+    }
+
+    // --- Substitution variable message formatting ---
+
+    @Test
+    void testOneParamSubstitution()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.subst.one");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
+        String pattern = logger.getResourceBundle().getString("class.not.found");
+        String result = MessageFormat.format(pattern, "com.example.Foo");
+        assertEquals("\"Class com.example.Foo not found\"", result);
+    }
+
+    @Test
+    void testTwoParamSubstitution()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.subst.two");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
+        String pattern = logger.getResourceBundle().getString("failed.to.instantiate");
+        String result = MessageFormat.format(pattern, "com.example.Foo", "NullPointerException");
+        assertEquals("\"Failed to instantiate com.example.Foo, exception type: NullPointerException\"", result);
+    }
+
+    @Test
+    void testThreeParamSubstitution()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.subst.three");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
+        String pattern = logger.getResourceBundle().getString("resource.bundle.load.error");
+        String result = MessageFormat.format(pattern, "IOException", "com.example.MyBundle", "fr_FR");
+        assertEquals("\"An exception of type IOException was raised while loading a bundle for baseName com.example.MyBundle, Locale [fr_FR]\"", result);
+    }
+
+    @Test
+    void testLocalizedOneParamSubstitution()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.subst.fr.one");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.FRENCH));
+        String pattern = logger.getResourceBundle().getString("class.not.found");
+        String result = MessageFormat.format(pattern, "com.example.Foo");
+        assertEquals("\"Classe com.example.Foo introuvable\"", result);
+    }
+
+    @Test
+    void testLocalizedTwoParamSubstitution()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.subst.fr.two");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.FRENCH));
+        String pattern = logger.getResourceBundle().getString("failed.to.instantiate");
+        String result = MessageFormat.format(pattern, "com.example.Foo", "NullPointerException");
+        assertEquals("\"Échec de l'instanciation de com.example.Foo, type d'exception : NullPointerException\"", result);
+    }
+
+    @Test
+    void testLogBundleKeyWithOneParam()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.log.bundle.one");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
+        ResourceBundle bundle = logger.getResourceBundle();
+        assertDoesNotThrow(() -> logger.log(System.Logger.Level.INFO, bundle, "class.not.found", "com.example.Foo"));
+    }
+
+    @Test
+    void testLogBundleKeyWithTwoParams()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.log.bundle.two");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
+        ResourceBundle bundle = logger.getResourceBundle();
+        assertDoesNotThrow(() -> logger.log(System.Logger.Level.INFO, bundle, "failed.to.instantiate", "com.example.Foo", "NullPointerException"));
+    }
+
+    @Test
+    void testLogBundleKeyWithOneParamFrench()
+    {
+        LocalizableLogger logger = LocalizableLogger.createLocalizableLogger("test.log.bundle.fr.one");
+        assertDoesNotThrow(() -> logger.setBundleLocale(Locale.FRENCH));
+        ResourceBundle bundle = logger.getResourceBundle();
+        assertDoesNotThrow(() -> logger.log(System.Logger.Level.INFO, bundle, "class.not.found", "com.example.Foo"));
     }
 }

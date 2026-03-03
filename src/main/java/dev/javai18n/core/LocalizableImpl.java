@@ -27,17 +27,21 @@ import java.util.ResourceBundle;
  *
  * static
  * {
- *     GetResourceBundleRegistrar.registerGetResourceBundleCallback(callback);
+ *     MyModuleRegistrar.ensureRegistered();
  * }
  *
- * The callback argument must specify an implementation of the GetResourceBundleCallback interface that is a
- * singleton instance in the module.
- *
- * Extending classes of the subclass that reside in different modules than the original extender will likewise have
- * to ensure a callback is registered for their module.
+ * Where MyModuleRegistrar.ensureRegistered() is a static function that takes care of registering
+ * an implementation of the GetResourceBundleCallback interface (a singleton instance in the module) and optionally
+ * the package as a valid source of AttributeCollection objects within ResourceBundles. See I18NModuleRegistrar for
+ * an example registrar.
  */
 public class LocalizableImpl implements Localizable
 {
+    static
+    {
+        I18NModuleRegistrar.ensureRegistered();
+    }
+
     /**
      * A LocalizationDelegate to which the Localizable functions will be delegated.
      */

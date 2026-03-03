@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3]
+
+### Added
+
+- `I18NModuleRegistrar`: new class that consolidates `GetResourceBundleCallback` registration
+  and `dev.javai18n.core` `AttributeCollection` package registration into a single idempotent
+  `ensureRegistered()` call, replacing per-class registration boilerplate
+
+### Changed
+
+- **Breaking**: `XMLResourceBundle` XML documents must now declare the local DTD using the
+  PUBLIC identifier `-//dev.javai18n//DTD Properties//EN` instead of a relative or absolute
+  system ID. The required form is:
+  `<!DOCTYPE properties PUBLIC "-//dev.javai18n//DTD Properties//EN" "dev/javai18n/core/properties.dtd">`.
+  Documents referencing the Sun/Oracle system ID (`http://java.sun.com/dtd/properties.dtd`
+  or the `https` variant) continue to work unchanged.
+- `XMLResourceBundle.PropertiesDtdResolver`: replaced heuristic system-ID path matching
+  (`startsWith("file:")`, `endsWith("properties.dtd")`) with an exact match on the PUBLIC
+  identifier; removed `isLocalPropertiesDtd()` and `LOCAL_DTD_NAME`; added `LOCAL_DTD_PUBLIC_ID`
+- `LocalizableImpl` and `LocalizableLogger` static initializers now call
+  `I18NModuleRegistrar.ensureRegistered()` instead of registering directly with
+  `GetResourceBundleRegistrar`
+- Expanded class-level Javadoc for `JsonResourceBundle` and `XMLResourceBundle` with
+  string-only and typed-object bundle examples; documented `AttributeCollection` usage,
+  the `type` field/attribute, no-arg constructor requirement, and package registration
+- `README.md` XML sample updated to use the PUBLIC identifier DOCTYPE declaration
+
 ## [1.2.1]
 
 ### Changed

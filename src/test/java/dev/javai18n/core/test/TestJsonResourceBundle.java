@@ -19,6 +19,7 @@ package dev.javai18n.core.test;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import dev.javai18n.core.JsonResourceBundle;
 import dev.javai18n.core.AttributeCollectionResourceBundle;
@@ -37,8 +38,7 @@ public class TestJsonResourceBundle
     @BeforeAll
     public static void registerTypes()
     {
-        AttributeCollectionResourceBundle.registerAttributeCollectionPackage(
-            SimpleAttributeCollection.class.getPackageName());
+        I18NTestModuleRegistrar.ensureRegistered();
     }
 
     @Test
@@ -208,6 +208,17 @@ public class TestJsonResourceBundle
         AttributeCollectionWithStringArray coll = (AttributeCollectionWithStringArray) jBundle.getObject("My Object");
         String[] array = coll.getValues();
         assertEquals(3, array.length);
+    }
+
+    @Test
+    public void testSubstitutionVariable()
+    {
+        InputStream inputStream = new ByteArrayInputStream(
+            "{\"message\": \"Hello, {0}! You have {1} messages.\"}".getBytes());
+        JsonResourceBundle jsonBundle = assertDoesNotThrow(() -> new JsonResourceBundle(inputStream));
+        String pattern = jsonBundle.getString("message");
+        String result = MessageFormat.format(pattern, "World", 3);
+        assertEquals("Hello, World! You have 3 messages.", result);
     }
 
     @Test

@@ -209,7 +209,7 @@ properties DTD:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE properties SYSTEM "properties.dtd">
+<!DOCTYPE properties PUBLIC "-//dev.javai18n//DTD Properties//EN" "dev/javai18n/core/properties.dtd">
 <properties>
     <entry key="greeting">Hello!</entry>
     <entry key="colors">

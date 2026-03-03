@@ -39,24 +39,140 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
- * A ResourceBundle that is loaded from an XML document. The document must conform to the DTD
- * provided in this module's resources (dev/javai18n/core/properties.dtd) or from
- * https://java.sun.com/dtd/properties.dtd. The DTD provided with this module is a super set of
- * the latter.
+ * A {@link ResourceBundle} loaded from an XML document.
+ *
+ * <h2>Document structure</h2>
+ * <p>The document must conform to the DTD provided in this module's resources
+ * ({@code dev/javai18n/core/properties.dtd}), which is a superset of the Sun/Oracle properties
+ * DTD at {@code https://java.sun.com/dtd/properties.dtd}. Declare the DTD using the module's
+ * public identifier:</p>
+ * <pre>{@code
+ * <!DOCTYPE properties PUBLIC "-//dev.javai18n//DTD Properties//EN"
+ *                             "dev/javai18n/core/properties.dtd">
+ * }</pre>
+ * <p>Documents that reference the Sun/Oracle system ID
+ * ({@code http://java.sun.com/dtd/properties.dtd} or the {@code https} variant) are also
+ * supported, with the Sun DTD fetched from the network (cached after first use) and the local
+ * module resource used as fallback.</p>
+ *
+ * <p>The root element is {@code <properties>}. Each child {@code <entry>} element becomes a
+ * bundle entry; its required {@code key} attribute is the bundle key. Entry values may be:</p>
+ * <ul>
+ *   <li><b>String</b> — the text content of the {@code <entry>} element; retrieved via
+ *       {@link ResourceBundle#getString(String)}</li>
+ *   <li><b>Array</b> — an {@code <array>} child element containing {@code <item>} children;
+ *       stored as {@code String[]} when all items are strings, otherwise as {@code Object[]};
+ *       retrieved via {@link ResourceBundle#getStringArray(String)} or
+ *       {@link ResourceBundle#getObject(String)}</li>
+ *   <li><b>Object</b> — an {@code <object>} child element; deserialized into an
+ *       {@link AttributeCollection}; retrieved via {@link ResourceBundle#getObject(String)}</li>
+ * </ul>
+ *
+ * <h2>String-only bundle</h2>
+ * <p>A bundle containing string entries and a string array:</p>
+ * <pre>{@code
+ * <?xml version="1.0" encoding="UTF-8"?>
+ * <!DOCTYPE properties PUBLIC "-//dev.javai18n//DTD Properties//EN"
+ *                             "dev/javai18n/core/properties.dtd">
+ * <properties>
+ *     <entry key="greeting">Hello</entry>
+ *     <entry key="farewell">Goodbye</entry>
+ *     <entry key="weekdays">
+ *         <array>
+ *             <item>Monday</item>
+ *             <item>Tuesday</item>
+ *             <item>Wednesday</item>
+ *             <item>Thursday</item>
+ *             <item>Friday</item>
+ *         </array>
+ *     </entry>
+ * </properties>
+ * }</pre>
+ *
+ * <h2>Bundle containing typed objects</h2>
+ * <p>An {@code <object>} element is deserialized into an {@link AttributeCollection}. Its
+ * required {@code type} attribute holds the fully qualified class name of the target type.
+ * Each child {@code <entry>} element of the object is passed to the instance via
+ * {@link AttributeCollection#setAttribute(String, Object)}, one call per entry.</p>
+ *
+ * <p>Given the following {@code AttributeCollection} implementation:</p>
+ * <pre>{@code
+ * package com.example;
+ *
+ * public class ButtonProps implements AttributeCollection {
+ *     private String label;
+ *     private String tooltip;
+ *
+ *     public ButtonProps() {}  // public no-arg constructor required
+ *
+ *     public String getLabel()   { return label; }
+ *     public String getTooltip() { return tooltip; }
+ *
+ *     @Override
+ *     public void setAttribute(String name, Object value) {
+ *         switch (name) {
+ *             case "label"   -> label   = (String) value;
+ *             case "tooltip" -> tooltip = (String) value;
+ *         }
+ *     }
+ * }
+ * }</pre>
+ *
+ * <p>…a bundle that includes a string entry and an object entry for it looks like:</p>
+ * <pre>{@code
+ * <?xml version="1.0" encoding="UTF-8"?>
+ * <!DOCTYPE properties PUBLIC "-//dev.javai18n//DTD Properties//EN"
+ *                             "dev/javai18n/core/properties.dtd">
+ * <properties>
+ *     <entry key="title">File Explorer</entry>
+ *     <entry key="okButton">
+ *         <object type="com.example.ButtonProps">
+ *             <entry key="label">OK</entry>
+ *             <entry key="tooltip">Confirm the selection</entry>
+ *         </object>
+ *     </entry>
+ * </properties>
+ * }</pre>
+ *
+ * <p>The object is then retrieved and cast:</p>
+ * <pre>{@code
+ * ButtonProps ok = (ButtonProps) bundle.getObject("okButton");
+ * }</pre>
+ *
+ * <h3>Package registration</h3>
+ * <p>As a security measure, only classes whose package has been explicitly registered may be
+ * instantiated. Attempting to deserialize an object whose class belongs to an unregistered
+ * package throws {@link java.io.IOException}. Packages are registered once — typically at
+ * application or module startup — before any bundle containing objects in that package is
+ * loaded:</p>
+ * <pre>{@code
+ * AttributeCollectionResourceBundle.registerAttributeCollectionPackage("com.example");
+ * }</pre>
+ *
+ * <h3>No-arg constructor requirement</h3>
+ * <p>The target class must have a {@code public} no-argument constructor. The bundle loader
+ * instantiates the object via that constructor and then populates it by calling
+ * {@link AttributeCollection#setAttribute(String, Object)} for each child entry of the
+ * {@code <object>} element.</p>
+ *
+ * @see JsonResourceBundle
+ * @see AttributeCollection
+ * @see AttributeCollectionResourceBundle#registerAttributeCollectionPackage(String)
  */
 public class XMLResourceBundle  extends AttributeCollectionResourceBundle
 {
     /**
-     * An EntityResolver that resolves the properties DTD. Recognized system IDs are:
+     * An EntityResolver that resolves the properties DTD. Recognized identifiers are:
      * <ul>
-     *   <li>{@code http://java.sun.com/dtd/properties.dtd} and
-     *       {@code https://java.sun.com/dtd/properties.dtd} — fetched from the
-     *       Sun/Oracle server (with caching and redirect following). If the fetch
-     *       fails, falls back to the local module resource.</li>
-     *   <li>{@code properties.dtd} and {@code dev/javai18n/core/properties.dtd} — resolved
-     *       to the local module resource, which is a superset of the Sun DTD.</li>
+     *   <li>Public ID {@code -//dev.javai18n//DTD Properties//EN} — resolved to the local
+     *       module resource ({@code dev/javai18n/core/properties.dtd}), which is a superset
+     *       of the Sun/Oracle DTD.</li>
+     *   <li>System ID {@code http://java.sun.com/dtd/properties.dtd} or
+     *       {@code https://java.sun.com/dtd/properties.dtd} — fetched from the Sun/Oracle
+     *       server (with caching and redirect following). If the fetch fails, falls back to
+     *       the local module resource.</li>
      * </ul>
-     * All other system IDs are blocked to prevent XXE attacks.
+     * All other identifiers are blocked to prevent XXE attacks.
      */
     protected static final class PropertiesDtdResolver implements EntityResolver
     {
@@ -68,7 +184,7 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
         private static final String SUN_DTD_HTTPS = "https://java.sun.com/dtd/properties.dtd";
         private static final String SUN_DTD_HTTP = "http://java.sun.com/dtd/properties.dtd";
         private static final String LOCAL_DTD_PATH = "dev/javai18n/core/properties.dtd";
-        private static final String LOCAL_DTD_NAME = "properties.dtd";
+        private static final String LOCAL_DTD_PUBLIC_ID = "-//dev.javai18n//DTD Properties//EN";
         private static final int TIMEOUT_MS = 5000;
         private static final int MAX_REDIRECTS = 5;
 
@@ -79,15 +195,12 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
         public InputSource resolveEntity(String publicID, String systemID)
                 throws SAXException, IOException
         {
-            if (null == systemID)
-            {
-                throw new SAXException("Resolution of external entity blocked: null systemID");
-            }
-            if (systemID.equals(SUN_DTD_HTTP) || systemID.equals(SUN_DTD_HTTPS))
+            if (systemID != null &&
+                (systemID.equals(SUN_DTD_HTTP) || systemID.equals(SUN_DTD_HTTPS)))
             {
                 return resolveSunDtd();
             }
-            if (isLocalPropertiesDtd(systemID))
+            if (LOCAL_DTD_PUBLIC_ID.equals(publicID))
             {
                 return resolveLocalDtd();
             }
@@ -179,25 +292,6 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
             return new InputSource(dtdStream);
         }
 
-        /**
-         * Returns {@code true} if the system ID identifies the local properties DTD.
-         * Matches the relative forms ({@code "properties.dtd"} and
-         * {@code "dev/javai18n/core/properties.dtd"}) as well as absolute {@code file://}
-         * URIs that the DOM parser produces when resolving relative system IDs.
-         */
-        private static boolean isLocalPropertiesDtd(String systemID)
-        {
-            if (systemID.equals(LOCAL_DTD_NAME) || systemID.equals(LOCAL_DTD_PATH))
-            {
-                return true;
-            }
-            if (systemID.startsWith("file:"))
-            {
-                return systemID.endsWith("/" + LOCAL_DTD_NAME) ||
-                       systemID.endsWith("/" + LOCAL_DTD_PATH);
-            }
-            return false;
-        }
     }
 
     /** The cached DocumentBuilderFactory configured for parsing property XML documents. */
