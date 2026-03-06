@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.2] - 2026-03-06
+
+### Removed
+
+- Vestigial `META-INF/services/` entries for `XxxProvider` interfaces (1 main, 10 test):
+  these files were not consulted in either classpath mode (which uses
+  `AssociativeResourceBundleControl` installed via `java.util.spi.ResourceBundleControlProvider`)
+  or module-path mode (which uses `module-info.class` `provides` directives)
+- Step from `README.md` documenting creation of `META-INF/services/` `XxxProvider` files
+
 ## [1.3.1]
 
 ### Security
