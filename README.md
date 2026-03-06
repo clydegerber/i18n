@@ -409,14 +409,6 @@ public class ModuleProviderImpl extends AssociativeResourceBundleProvider
 NOTE: Additional spi implementations in the package can be added to the 'implements' clause,
 rather than creating an implementation for each interface.
 
-**4.** Create a file named org.example.spi.MyClassProvider in META-INF/services with contents:
-
-```java
-dev.javai18n.core.test.spi.ModuleProviderImpl
-```
-
-NOTE: Additional spi implementations will each require their own file, all will have the same content.
-
 The AssociativeResourceBundleProvider and AssociativeResourceBundleControl both make use of the
 AssociativeResourceBundleLocator class to locate and load ResourceBundles.
 
