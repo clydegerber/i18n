@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.3] - 2026-03-06
+
+### Added
+
+- `exports dev.javai18n.core.spi` in `module-info.java` so that `LocalizableLoggerProvider`
+  is visible to downstream modules and appears in the published Javadoc, consistent with
+  how `dev.javai18n.swing` exports its `spi` package
+
 ## [1.3.2] - 2026-03-06
 
 ### Removed

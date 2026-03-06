@@ -23,6 +23,7 @@
 module dev.javai18n.core
 {
     exports dev.javai18n.core;
+    exports dev.javai18n.core.spi;
     requires transitive java.xml;
     requires transitive tools.jackson.databind;
     uses dev.javai18n.core.spi.LocalizableLoggerProvider;
