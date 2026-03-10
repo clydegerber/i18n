@@ -21,6 +21,7 @@ Thumbs.db
 
 # Claude Code
 .claude/
+CLAUDE.md
 
 # Generated javadoc artifacts
 dev.javai18n.core/

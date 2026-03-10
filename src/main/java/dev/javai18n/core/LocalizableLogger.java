@@ -63,7 +63,8 @@ public class LocalizableLogger implements Localizable, System.Logger
         Locale.GERMAN,
         Locale.ITALIAN,
         Locale.JAPANESE,
-        Locale.KOREAN
+        Locale.KOREAN,
+        Locale.forLanguageTag("es")
     };
 
     /**

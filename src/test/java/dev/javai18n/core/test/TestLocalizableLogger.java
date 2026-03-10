@@ -89,7 +89,8 @@ public class TestLocalizableLogger
             Locale.GERMAN,
             Locale.ITALIAN,
             Locale.JAPANESE,
-            Locale.KOREAN
+            Locale.KOREAN,
+            Locale.forLanguageTag("es")
         };
         assertArrayEquals(expected, logger.getAvailableLocales());
     }
