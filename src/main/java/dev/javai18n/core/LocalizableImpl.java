@@ -61,7 +61,7 @@ public class LocalizableImpl implements Localizable
      * @param locale The intended Locale for ResourceBundles provided by the object.
      */
     @Override
-    public void setBundleLocale(Locale locale) throws NoCallbackRegisteredForModuleException
+    public void setBundleLocale(Locale locale)
     {
         delegate.setBundleLocale(locale);
     }
@@ -83,7 +83,7 @@ public class LocalizableImpl implements Localizable
      * @return The ResourceBundle for the object according to its locale.
      */
     @Override
-    public ResourceBundle getResourceBundle() throws NoCallbackRegisteredForModuleException
+    public ResourceBundle getResourceBundle()
     {
         return delegate.getResourceBundle();
     }

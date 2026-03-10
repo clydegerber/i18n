@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import dev.javai18n.core.JsonResourceBundle;
-import dev.javai18n.core.AttributeCollectionResourceBundle;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -196,6 +195,19 @@ public class TestJsonResourceBundle
         NumericValueAttributeCollection coll = (NumericValueAttributeCollection) jBundle.getObject("key1");
         NumericValueAttributeCollection expected = new NumericValueAttributeCollection(null, 0, 0, false);
         assertEquals(expected, coll);
+    }
+
+    /**
+     * Tests that a null top-level value throws an IOException.
+     */
+    @Test
+    public void testTopLevelNullValueThrows()
+    {
+        String input = "{\"key1\": null, \"key2\": \"value2\"}";
+        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
+        Exception e = assertThrows(IOException.class, ()->{ new JsonResourceBundle(inputStream); },
+            "Exception not thrown");
+        assertEquals("JSON format error - null value for key: key1", e.getMessage());
     }
 
     @Test

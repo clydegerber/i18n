@@ -17,7 +17,17 @@
 package dev.javai18n.core;
 
 /**
- * An interface for objects that allow setting of named attributes. Used in deserializing JsonResourceBundles and XMLResourceBundles.
+ * An interface for objects that allow setting of named attributes. Used in deserializing
+ * {@link JsonResourceBundle}s and {@link XMLResourceBundle}s.
+ *
+ * <p>As a security measure, only classes whose package has been explicitly registered may be
+ * instantiated from resource files. The implementing class's package must be registered before
+ * loading any bundle that references it:</p>
+ * <pre>{@code
+ * AttributeCollectionResourceBundle.registerAttributeCollectionPackage("com.example");
+ * }</pre>
+ *
+ * @see AttributeCollectionResourceBundle#registerAttributeCollectionPackage(String)
  */
 public interface AttributeCollection
 {

@@ -27,22 +27,22 @@ public class GetResourceBundleRegistrar
     /**
      * The singleton GetResourceBundleRegistrar.
      */
-    protected final static GetResourceBundleRegistrar registrar = new GetResourceBundleRegistrar();
+    private static final GetResourceBundleRegistrar registrar = new GetResourceBundleRegistrar();
 
     /**
      * Are we running under JPMS?
      */
-    protected final static boolean moduleMode = GetResourceBundleRegistrar.class.getModule().isNamed();
+    private static final boolean moduleMode = GetResourceBundleRegistrar.class.getModule().isNamed();
 
     /**
      * A map to associate a GetResourceBundleCallback to a Module.
      */
-    protected final ConcurrentHashMap<Module, GetResourceBundleCallback> map;
+    private final ConcurrentHashMap<Module, GetResourceBundleCallback> map;
 
     /**
      * Construct the GetResourceBundleRegistrar.
      */
-    protected GetResourceBundleRegistrar()
+    private GetResourceBundleRegistrar()
     {
         map = new ConcurrentHashMap<>();
     }
@@ -54,7 +54,7 @@ public class GetResourceBundleRegistrar
      * @throws IllegalStateException if a different callback is already registered for the
      *         callback's module.
      */
-    protected void registerCallbackForModule(GetResourceBundleCallback callback)
+    private void registerCallbackForModule(GetResourceBundleCallback callback)
     {
         Module module = callback.getClass().getModule();
         if (!moduleMode)
@@ -80,7 +80,7 @@ public class GetResourceBundleRegistrar
      *
      * @return The GetResourceBundleCallback for the specified Module.
      */
-    protected GetResourceBundleCallback getCallbackForModule(Module module)
+    private GetResourceBundleCallback lookupCallback(Module module)
     {
         return map.get(module);
     }
@@ -105,8 +105,8 @@ public class GetResourceBundleRegistrar
      * @param module The Module for which the GetResourceBundleCallback is desired.
      * @return The GetResourceBundleCallback for the Module.
      */
-    public static GetResourceBundleCallback getGetResourceBundleCallback(Module module)
+    public static GetResourceBundleCallback getCallbackForModule(Module module)
     {
-        return registrar.getCallbackForModule(module);
+        return registrar.lookupCallback(module);
     }
 }

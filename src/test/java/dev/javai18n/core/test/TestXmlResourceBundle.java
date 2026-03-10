@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 import dev.javai18n.core.XMLResourceBundle;
-import dev.javai18n.core.AttributeCollectionResourceBundle;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -231,7 +230,8 @@ public class TestXmlResourceBundle
     }
 
     /**
-     * Test the behavior of an XML document with no string, object or array for an entry element.
+     * Test the behavior of an XML document with no string, object or array for an entry element
+     * within an AttributeCollection object.
      */
    @Test
     public void testNullValues()
@@ -250,6 +250,24 @@ public class TestXmlResourceBundle
         NumericValueAttributeCollection coll = (NumericValueAttributeCollection) xmlBundle.getObject("key1");
         NumericValueAttributeCollection expected = new NumericValueAttributeCollection(null, 0, 0, false);
         assertEquals(expected, coll);
+    }
+
+    /**
+     * Tests that a null top-level entry value throws an IOException.
+     */
+    @Test
+    public void testTopLevelNullValueThrows()
+    {
+        String input = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                       "<!DOCTYPE properties PUBLIC \"-//dev.javai18n//DTD Properties//EN\" \"dev/javai18n/core/properties.dtd\">" +
+                       "<properties>" +
+                           "<entry key='key1'/>" +
+                           "<entry key='key2'>value2</entry>" +
+                       "</properties>";
+        InputStream inputStream = new ByteArrayInputStream(input.getBytes());
+        Exception e = assertThrows(IOException.class, ()->{ new XMLResourceBundle(inputStream); },
+            "Exception not thrown");
+        assertEquals("XML format error - null value for key: key1", e.getMessage());
     }
 
     @Test

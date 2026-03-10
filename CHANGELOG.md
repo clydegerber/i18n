@@ -4,6 +4,56 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] - 2026-03-10
+
+### Added
+
+- `LocalizableLoggerBundle_es.properties`: Spanish locale for the framework's own log messages
+- `Resource.getKey()`: public accessor for the bundle key (previously only accessible as a
+  `protected` field to subclasses)
+- `AttributeCollection`: Javadoc note explaining that implementing class packages must be
+  registered via `AttributeCollectionResourceBundle.registerAttributeCollectionPackage()`
+  before loading any bundle that references them
+
+### Changed
+
+- `I18NModuleRegistrar.ensureRegistered()`: replaced double-checked locking with
+  `AtomicBoolean.compareAndSet` for correct thread-safe one-time initialization
+- `GetResourceBundleRegistrar`: renamed public static `getGetResourceBundleCallback(Module)`
+  to `getCallbackForModule(Module)`; made internal fields and methods `private`
+- `NestedResourceBundle.handleGetObject()`: returns `null` instead of throwing
+  `MissingResourceException` when a key is not found, honoring the `ResourceBundle` contract;
+  uses `superBundle.handleGetObject(key)` instead of `superBundle.getObject(key)` to avoid
+  exception-as-control-flow; key set cached with a `volatile` field
+- `LocalizableLogger.getAvailableLocales()`: returns `AVAILABLE_LOCALES.clone()` instead of
+  the backing array directly
+- `LocalizableLogger.createLocalizableLogger()`: documented that the returned logger uses the
+  i18n framework's own `LocalizableLoggerBundle`; consumers needing a logger backed by their
+  own message catalogue should subclass `LocalizableLogger` from within their own module
+- `LocalizableImpl`: removed redundant `throws NoCallbackRegisteredForModuleException`
+  declarations from `setBundleLocale()` and `getResourceBundle()`
+- `Resource`: made `source` and `key` fields `private final`; constructor now null-checks
+  both parameters
+- `ResourcefulDelegate`: constructor now null-checks both `resource` and `eventHandler`
+- `AssociativeResourceBundleControl`, `AssociativeResourceBundleProvider`: made `locator`
+  fields `private final`
+- `AssociativeResourceBundleLocator`: corrected constructor Javadoc — empty suffix is valid
+  (used internally by `noSuffixLocator`)
+- `AttributeCollectionResourceBundle`: changed `props` type from `ConcurrentHashMap` to
+  `Map`; added `handleKeySet()` override so `ResourceBundle`'s built-in `keySet()` caching
+  works correctly; `getKeys()` now delegates to `keySet()`
+- `LocalizableLoggerBundle.properties` (all locales): removed unnecessary literal `"`
+  characters surrounding log message values
+
+### Fixed
+
+- `JsonResourceBundle`, `XMLResourceBundle`: null top-level values now throw `IOException`
+  instead of being silently dropped — a null value at the top level of a bundle is invalid
+  input; null values within `AttributeCollection` attributes continue to be supported
+- `AttributeCollectionResourceBundle.resolveConstructor()`: error messages for "does not
+  implement AttributeCollection" and "public no-arg constructor not found" now include the
+  class name
+
 ## [1.3.3] - 2026-03-06
 
 ### Added

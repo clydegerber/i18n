@@ -31,9 +31,9 @@ import java.util.ResourceBundle.Control;
  */
 public class AssociativeResourceBundleControl extends Control
 {
-    AssociativeResourceBundleLocator locator;
+    private final AssociativeResourceBundleLocator locator;
 
-    AssociativeResourceBundleLocator noSuffixLocator;
+    private final AssociativeResourceBundleLocator noSuffixLocator;
 
     /**
      * Construct an AssociativeResourceBundleControl with an AssociativeResourceBundleLocator that

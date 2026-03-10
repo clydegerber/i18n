@@ -74,6 +74,13 @@ public class LocalizableLogger implements Localizable, System.Logger
 
     /**
      * A factory method that returns a LocalizableLogger for the specified name in the default Locale.
+     *
+     * <p>The returned logger resolves its resource bundle from the {@code LocalizableLogger} class
+     * hierarchy, which means it uses the i18n framework's own {@code LocalizableLoggerBundle}. This
+     * is appropriate for logging framework-internal messages in the framework's supported locales.
+     * Consumers that need a logger backed by their own message catalogue should subclass
+     * {@code LocalizableLogger} from within their own module.</p>
+     *
      * @param name the name of the logger.
      * @return A LocalizableLogger for the specified name in the default Locale.
      */
@@ -141,7 +148,7 @@ public class LocalizableLogger implements Localizable, System.Logger
     @Override
     public Locale[] getAvailableLocales()
     {
-        return AVAILABLE_LOCALES;
+        return AVAILABLE_LOCALES.clone();
     }
 
     /**

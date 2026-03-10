@@ -24,8 +24,9 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -348,7 +349,7 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
      */
     public XMLResourceBundle(InputStream stream) throws IOException
     {
-        props = new ConcurrentHashMap<>();
+        props = new HashMap<>();
         try
         {
             DocumentBuilder db = createDocumentBuilder();
@@ -364,6 +365,7 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
         {
             throw new IOException("Failed to parse any properties from the specified stream");
         }
+        props = Collections.unmodifiableMap(props);
     }
 
     /**
@@ -388,6 +390,10 @@ public class XMLResourceBundle  extends AttributeCollectionResourceBundle
             if (parentObject != null)
             {
                 parentObject.setAttribute(key, value);
+            }
+            else if (value == null)
+            {
+                throw new IOException("XML format error - null value for key: " + key);
             }
             else
             {

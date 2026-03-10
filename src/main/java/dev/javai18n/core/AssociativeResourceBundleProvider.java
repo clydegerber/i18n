@@ -32,7 +32,7 @@ public class AssociativeResourceBundleProvider extends AbstractResourceBundlePro
     private static final StackWalker STACK_WALKER =
             StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
 
-    AssociativeResourceBundleLocator locator;
+    private final AssociativeResourceBundleLocator locator;
 
     /**
      * Return a ResourceBundle found by appending "Bundle" to the baseName, or null.

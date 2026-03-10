@@ -16,6 +16,8 @@
 
 package dev.javai18n.core;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Consolidates module-level registrations for the i18n module.
  * Ensures that the {@link dev.javai18n.core.GetResourceBundleCallback} and
@@ -24,7 +26,7 @@ package dev.javai18n.core;
  */
 public final class I18NModuleRegistrar
 {
-    private static volatile boolean registered;
+    private static final AtomicBoolean registered = new AtomicBoolean(false);
 
     private I18NModuleRegistrar() {}
 
@@ -35,13 +37,12 @@ public final class I18NModuleRegistrar
      */
     public static void ensureRegistered()
     {
-        if (!registered)
+        if (registered.compareAndSet(false, true))
         {
             GetResourceBundleRegistrar.registerGetResourceBundleCallback(
                 ModuleResourceBundleCallback.GET_BUNDLE_CALLBACK);
             AttributeCollectionResourceBundle.registerAttributeCollectionPackage(
                 I18NModuleRegistrar.class.getPackageName());
-            registered = true;
         }
     }
 }

@@ -23,7 +23,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,9 +68,10 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
         new ConcurrentHashMap<>();
 
     /**
-     * The HashMap that contains the resource keys and values.
+     * The map that contains the resource keys and values. Set by subclass constructors;
+     * effectively read-only after construction.
      */
-    protected ConcurrentHashMap<String, Object> props;
+    protected Map<String, Object> props;
 
     /**
      * Default constructor for subclasses.
@@ -129,7 +130,8 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
         if (!AttributeCollection.class.isAssignableFrom(c))
         {
             I18N_LOGGER.log(System.Logger.Level.DEBUG, "type.not.attribute.collection", className);
-            throw new IOException("Failed to construct AttributeCollection object");
+            throw new IOException("Failed to construct AttributeCollection object: "
+                + className + " does not implement AttributeCollection");
         }
         Constructor<?> ctor;
         try
@@ -143,7 +145,8 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
         if (!Modifier.isPublic(ctor.getModifiers()))
         {
             I18N_LOGGER.log(System.Logger.Level.DEBUG, "constructor.not.public", className);
-            throw new IOException("Failed to construct AttributeCollection object");
+            throw new IOException("Failed to construct AttributeCollection object: "
+                + "public no-arg constructor not found in " + className);
         }
         return ctor;
     }
@@ -186,19 +189,27 @@ public abstract class AttributeCollectionResourceBundle extends ResourceBundle
     }
 
     /**
-     * Returns an enumeration of the keys.
+     * Returns the set of keys owned directly by this bundle, excluding parent bundles.
+     * {@link ResourceBundle#keySet()} uses this result — combined with parent keys — and
+     * caches it, so this method itself does not need to handle parent traversal or caching.
      *
-     * @return an Enumeration of the keys contained in this ResourceBundle and its parent bundles.
+     * @return a Set of the keys in this bundle's own property map.
+     */
+    @Override
+    protected Set<String> handleKeySet()
+    {
+        return props.keySet();
+    }
+
+    /**
+     * Returns an enumeration of the keys in this ResourceBundle and its parent bundles.
+     *
+     * @return an Enumeration of all keys contained in this ResourceBundle and its parent bundles.
      */
     @Override
     public Enumeration<String> getKeys()
     {
-        Set<String> keys = new HashSet<>(props.keySet());
-        if (null != parent)
-        {
-            keys.addAll(parent.keySet());
-        }
-        return Collections.enumeration(keys);
+        return Collections.enumeration(keySet());
     }
 
 }

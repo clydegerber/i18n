@@ -154,7 +154,7 @@ public class LocalizationDelegate
             ResourceBundle delegate = null;
             clazz = c;
             Module module = clazz.getModule();
-            GetResourceBundleCallback caller = GetResourceBundleRegistrar.getGetResourceBundleCallback(module);
+            GetResourceBundleCallback caller = GetResourceBundleRegistrar.getCallbackForModule(module);
             if (null == caller)
             {
                 NoCallbackRegisteredForModuleException ex = new NoCallbackRegisteredForModuleException(module.getName());

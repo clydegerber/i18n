@@ -104,7 +104,7 @@ configuration are provided for module deployment.
 <dependency>
     <groupId>dev.javai18n</groupId>
     <artifactId>i18n-core</artifactId>
-    <version>1.2.1</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 

@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public class NestedResourceBundle extends ResourceBundle
      *
      * @return The parent bundle of this bundle.
      */
-    public NestedResourceBundle getParent() {return (NestedResourceBundle) parent;};
+    public NestedResourceBundle getParent() {return (NestedResourceBundle) parent;}
 
     /**
      * The ResourceBundle that actually contains the resources.
@@ -75,6 +74,13 @@ public class NestedResourceBundle extends ResourceBundle
     protected String baseBundleName;
 
     /**
+     * Cached unmodifiable key set. Populated lazily on the first call to keySet().
+     * Safe to cache because delegate, parent, and superBundle are never reassigned
+     * after construction.
+     */
+    private volatile Set<String> cachedKeySet;
+
+    /**
      * Construct a NestedResourceBundle from the specified delegate bundle, superBundle and baseBundleName.
      * @param delegate        The standard delegate to which handleGetObject() calls will be initially directed.
      * @param superBundle     The bundle for the next level up in the hierarchy which will be searched if a resource
@@ -100,13 +106,11 @@ public class NestedResourceBundle extends ResourceBundle
 
     /**
      * Gets an object for the given key from this ResourceBundle.
-     * Returns null if this ResourceBundle  does not contain an
-     * object for the given key. Calls the getObject() method in
-     * the delegate resource bundle and if not found, moves up the
-     * parent chain, calling the getObject() method of the delegate
-     * at every level. If not found in parent chain, calls the
-     * getObject() method of the resource bundle for the next higher
-     * level in the nesting hierarchy.
+     * Returns null if this ResourceBundle does not contain an
+     * object for the given key. Searches the delegate resource bundle
+     * first, then moves up the parent chain searching each delegate.
+     * If not found in the parent chain, delegates to the superBundle's
+     * handleGetObject() to continue the nesting-hierarchy search.
      *
      * @param key The key for the desired object
      *
@@ -137,16 +141,15 @@ public class NestedResourceBundle extends ResourceBundle
         }
         if (null != superBundle)
         {
-            return superBundle.getObject(key);
+            return superBundle.handleGetObject(key);
         }
-        throw new MissingResourceException("Can't find resource for bundle "
-                + this.getClass().getName() + ", key " + key,
-                this.getClass().getName(), key);
+        return null;
     }
 
     /**
      * Returns a Set of all keys contained in this NestedResourceBundle, its parent bundles,
-     * and the higher levels in the nesting hierarchy.
+     * and the higher levels in the nesting hierarchy. The result is cached after the first
+     * call, since the bundle structure is immutable after construction.
      *
      * @return a Set of all keys contained in this NestedResourceBundle, its parent bundles,
      *         and the higher levels in the nesting hierarchy.
@@ -154,6 +157,8 @@ public class NestedResourceBundle extends ResourceBundle
     @Override
     public Set<String> keySet()
     {
+        Set<String> ks = cachedKeySet;
+        if (null != ks) return ks;
         Set<String> keys = new HashSet<>(handleKeySet());
         if (null != parent)
         {
@@ -163,7 +168,9 @@ public class NestedResourceBundle extends ResourceBundle
         {
             keys.addAll(superBundle.keySet());
         }
-        return Collections.unmodifiableSet(keys);
+        ks = Collections.unmodifiableSet(keys);
+        cachedKeySet = ks;
+        return ks;
     }
 
     /**
@@ -212,7 +219,10 @@ public class NestedResourceBundle extends ResourceBundle
     }
 
     /**
-     * Dump the contents of the NestedResourceBundle to the system log.
+     * Writes the structure of this NestedResourceBundle to the system log at DEBUG level.
+     *
+     * <p>This is a debugging utility. Its output format is not part of the stable API
+     * and may change without notice.</p>
      */
     public void dump()
     {

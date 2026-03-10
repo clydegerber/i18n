@@ -67,8 +67,8 @@ public class AssociativeResourceBundleLocator
      * Construct a new ResourceBundleLocator for the given suffix.
      *
      * @param suffix The string that will be appended to the baseName to locate ResourceBundles.
+     *               May be empty, in which case the baseName is used as-is.
      * @throws NullPointerException if suffix is null
-     * @throws IllegalArgumentException if suffix is empty
      */
     public AssociativeResourceBundleLocator(String suffix)
     {

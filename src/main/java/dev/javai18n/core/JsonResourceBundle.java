@@ -22,9 +22,10 @@ import tools.jackson.core.JacksonException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link ResourceBundle} loaded from a JSON document.
@@ -134,7 +135,7 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
      */
     public JsonResourceBundle(InputStream stream) throws IOException
     {
-        props = new ConcurrentHashMap<>();
+        Map<String, Object> tempProps = new HashMap<>();
         try
         {
             JsonNode root = MAPPER.readTree(stream);
@@ -144,17 +145,23 @@ public class JsonResourceBundle  extends AttributeCollectionResourceBundle
             }
             for (Map.Entry<String, JsonNode> field : root.properties())
             {
-                props.put(field.getKey(), convertNode(field.getValue()));
+                Object value = convertNode(field.getValue());
+                if (value == null)
+                {
+                    throw new IOException("JSON format error - null value for key: " + field.getKey());
+                }
+                tempProps.put(field.getKey(), value);
             }
         }
         catch (JacksonException e)
         {
             throw new IOException(e.getMessage(), e);
         }
-        if (props.isEmpty())
+        if (tempProps.isEmpty())
         {
             throw new IOException("Failed to parse any properties from the specified stream");
         }
+        props = Collections.unmodifiableMap(tempProps);
     }
 
     /**

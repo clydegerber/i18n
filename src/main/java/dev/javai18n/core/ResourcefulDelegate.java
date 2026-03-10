@@ -53,9 +53,12 @@ public class ResourcefulDelegate implements LocaleEventListener
      *
      * @param resource     The initial Resource for the owning component.
      * @param eventHandler A LocaleEventListener to which locale events are forwarded.
+     * @throws NullPointerException if resource or eventHandler is null.
      */
     public ResourcefulDelegate(Resource resource, LocaleEventListener eventHandler)
     {
+        if (null == resource) throw new NullPointerException("resource is null");
+        if (null == eventHandler) throw new NullPointerException("eventHandler is null");
         this.resource = resource;
         this.eventHandler = eventHandler;
     }

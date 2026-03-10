@@ -278,13 +278,13 @@ public class TestNestedResourceBundle
         }
 
         assertEquals(8, messages.size());
-        assertEquals("\"NestedResourceBundle dump begin\"", messages.get(0));
-        assertEquals("\"base bundle name: dev.javai18n.core.test.LocalizableSub2\"", messages.get(1));
-        assertEquals("\"   delegate name: dev.javai18n.core.test.LocalizableSub2Bundle\"", messages.get(2));
-        assertEquals("\"   delegate type: dev.javai18n.core.test.LocalizableSub2Bundle\"", messages.get(3));
-        assertEquals("\"base bundle name: dev.javai18n.core.test.LocalizableSuper\"", messages.get(4));
-        assertEquals("\"   delegate name: dev.javai18n.core.test.LocalizableSuperBundle\"", messages.get(5));
-        assertEquals("\"   delegate type: dev.javai18n.core.test.LocalizableSuperBundle\"", messages.get(6));
-        assertEquals("\"NestedResourceBundle dump end\"", messages.get(7));
+        assertEquals("NestedResourceBundle dump begin", messages.get(0));
+        assertEquals("base bundle name: dev.javai18n.core.test.LocalizableSub2", messages.get(1));
+        assertEquals("   delegate name: dev.javai18n.core.test.LocalizableSub2Bundle", messages.get(2));
+        assertEquals("   delegate type: dev.javai18n.core.test.LocalizableSub2Bundle", messages.get(3));
+        assertEquals("base bundle name: dev.javai18n.core.test.LocalizableSuper", messages.get(4));
+        assertEquals("   delegate name: dev.javai18n.core.test.LocalizableSuperBundle", messages.get(5));
+        assertEquals("   delegate type: dev.javai18n.core.test.LocalizableSuperBundle", messages.get(6));
+        assertEquals("NestedResourceBundle dump end", messages.get(7));
     }
 }

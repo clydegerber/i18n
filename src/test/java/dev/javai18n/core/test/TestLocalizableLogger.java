@@ -245,7 +245,7 @@ public class TestLocalizableLogger
         assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
         String pattern = logger.getResourceBundle().getString("class.not.found");
         String result = MessageFormat.format(pattern, "com.example.Foo");
-        assertEquals("\"Class com.example.Foo not found\"", result);
+        assertEquals("Class com.example.Foo not found", result);
     }
 
     @Test
@@ -255,7 +255,7 @@ public class TestLocalizableLogger
         assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
         String pattern = logger.getResourceBundle().getString("failed.to.instantiate");
         String result = MessageFormat.format(pattern, "com.example.Foo", "NullPointerException");
-        assertEquals("\"Failed to instantiate com.example.Foo, exception type: NullPointerException\"", result);
+        assertEquals("Failed to instantiate com.example.Foo, exception type: NullPointerException", result);
     }
 
     @Test
@@ -265,7 +265,7 @@ public class TestLocalizableLogger
         assertDoesNotThrow(() -> logger.setBundleLocale(Locale.ENGLISH));
         String pattern = logger.getResourceBundle().getString("resource.bundle.load.error");
         String result = MessageFormat.format(pattern, "IOException", "com.example.MyBundle", "fr_FR");
-        assertEquals("\"An exception of type IOException was raised while loading a bundle for baseName com.example.MyBundle, Locale [fr_FR]\"", result);
+        assertEquals("An exception of type IOException was raised while loading a bundle for baseName com.example.MyBundle, Locale [fr_FR]", result);
     }
 
     @Test
@@ -275,7 +275,7 @@ public class TestLocalizableLogger
         assertDoesNotThrow(() -> logger.setBundleLocale(Locale.FRENCH));
         String pattern = logger.getResourceBundle().getString("class.not.found");
         String result = MessageFormat.format(pattern, "com.example.Foo");
-        assertEquals("\"Classe com.example.Foo introuvable\"", result);
+        assertEquals("Classe com.example.Foo introuvable", result);
     }
 
     @Test
@@ -285,7 +285,7 @@ public class TestLocalizableLogger
         assertDoesNotThrow(() -> logger.setBundleLocale(Locale.FRENCH));
         String pattern = logger.getResourceBundle().getString("failed.to.instantiate");
         String result = MessageFormat.format(pattern, "com.example.Foo", "NullPointerException");
-        assertEquals("\"Échec de l'instanciation de com.example.Foo, type d'exception : NullPointerException\"", result);
+        assertEquals("Échec de l'instanciation de com.example.Foo, type d'exception : NullPointerException", result);
     }
 
     @Test

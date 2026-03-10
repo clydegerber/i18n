@@ -17,6 +17,7 @@
 package dev.javai18n.core.test;
 
 import dev.javai18n.core.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Consolidates module-level registrations for the i18n test module.
@@ -26,7 +27,7 @@ import dev.javai18n.core.*;
  */
 public final class I18NTestModuleRegistrar
 {
-    private static volatile boolean registered;
+    private static final AtomicBoolean registered = new AtomicBoolean(false);
 
     private I18NTestModuleRegistrar() {}
 
@@ -37,13 +38,12 @@ public final class I18NTestModuleRegistrar
      */
     public static void ensureRegistered()
     {
-        if (!registered)
+        if (registered.compareAndSet(false, true))
         {
             GetResourceBundleRegistrar.registerGetResourceBundleCallback(
                 ModuleResourceBundleCallback.GET_BUNDLE_CALLBACK);
             AttributeCollectionResourceBundle.registerAttributeCollectionPackage(
                 I18NTestModuleRegistrar.class.getPackageName());
-            registered = true;
         }
     }
 }

@@ -25,23 +25,25 @@ public class Resource
      * A Localizable object that is the source for a locale-sensitive
      * resource using the key for this object.
      */
-    protected Localizable source;
+    private final Localizable source;
 
     /**
      * The key used to look up the locale-sensitive resource.
      */
-    protected String key;
+    private final String key;
 
     /**
      * Constructs a Resource from a Localizable source and a String key.
      *
      * @param source A Localizable object.
-     *
      * @param key The key used to lookup the resource from the
      *            ResourceBundle associated with source.
+     * @throws NullPointerException if source or key is null.
      */
     public Resource(Localizable source, String key)
     {
+        if (null == source) throw new NullPointerException("source is null");
+        if (null == key) throw new NullPointerException("key is null");
         this.source = source;
         this.key = key;
     }
@@ -89,5 +91,14 @@ public class Resource
     public final Localizable getSource()
     {
         return source;
+    }
+
+    /**
+     * Get the key used to look up the resource.
+     * @return The key used to look up the resource from the ResourceBundle provided by source.
+     */
+    public final String getKey()
+    {
+        return key;
     }
 }
