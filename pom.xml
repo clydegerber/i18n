@@ -219,6 +219,8 @@ java -Djava.util.logging.config.file=${project.basedir}/src/test/resources/test-
                                         <jar destfile="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" update="true">
                                             <fileset dir="${project.build.directory}/html" includes="README.html"/>
                                         </jar>
+                                        <copy file="${project.build.directory}/html/README.html"
+                                              todir="${project.build.directory}/reports/apidocs"/>
                                     </target>
                                 </configuration>
                             </execution>
