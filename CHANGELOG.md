@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.1] - 2026-06-30
+
+### Security
+
+- Upgraded `tools.jackson.core:jackson-databind` from 3.1.0 to 3.2.0 to resolve
+  multiple advisories, including GHSA-rmj7-2vxq-3g9f (`BasicPolymorphicTypeValidator`
+  array allowlist bypass, HIGH) and GHSA-j3rv-43j4-c7qm (`PolymorphicTypeValidator`
+  bypass via generic type parameters, HIGH); additional medium-severity advisories
+  cover `@JsonView` bypasses, case-insensitive `@JsonIgnoreProperties` bypass,
+  `InetSocketAddress` eager DNS resolution (SSRF), and deserialization of renamed
+  `@JsonIgnore`d setters via private fields
+
+### Changed
+
+- Upgraded JUnit (`junit-jupiter-engine`, `junit-platform-console`,
+  `junit-platform-launcher`) from 6.0.3 to 6.1.1
+- Release artifact: `README.html` is now copied into the `apidocs` output directory
+  alongside the generated Javadoc
+
+### Fixed
+
+- `ModuleProviderImpl`: added a Javadoc comment on the default constructor so the
+  release profile's `doclint:all` Javadoc check produces zero warnings
+
 ## [1.4.0] - 2026-03-10
 
 ### Added
