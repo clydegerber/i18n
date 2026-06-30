@@ -24,4 +24,10 @@ import dev.javai18n.core.AssociativeResourceBundleProvider;
 public class ModuleProviderImpl extends AssociativeResourceBundleProvider
         implements LocalizableLoggerProvider
 {
+    /**
+     * Constructs a new ModuleProviderImpl. Invoked by the JPMS service loader.
+     */
+    public ModuleProviderImpl()
+    {
+    }
 }
