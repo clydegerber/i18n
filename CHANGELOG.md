@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.2] - 2026-07-16
+
+### Security
+
+- Upgraded `tools.jackson.core:jackson-databind` from 3.2.0 to 3.2.1 to resolve
+  CVE-2026-59889 (`@JsonView` bypassed for `@JsonUnwrapped` Field/Setter properties)
+  and GHSA-mhm7-754m-9p8w (`@JsonView` bypass for `EXTERNAL_PROPERTY` external-type-id
+  properties). Neither advisory reaches this library's own Jackson usage, but the
+  patched version propagates to downstream consumers.
+
 ## [1.4.1] - 2026-06-30
 
 ### Security
