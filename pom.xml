@@ -247,6 +247,7 @@ java -Djava.util.logging.config.file=${project.basedir}/src/test/resources/test-
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
                         </configuration>
                     </plugin>
                 </plugins>
