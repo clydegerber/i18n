@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.3] - 2026-08-21
+
+### Changed
+
+- Upgraded `tools.jackson.core:jackson-databind` from 3.2.1 to 3.2.2. No advisory
+  is associated with this upgrade; as with previous releases, the newer version
+  propagates to downstream consumers.
+- Upgraded JUnit from 6.1.1 to 6.1.3 (`junit-jupiter-engine`,
+  `junit-platform-console`, `junit-platform-launcher`). Test scope only, with no
+  effect on consumers of this library.
+
 ## [1.4.2] - 2026-07-16
 
 ### Security
