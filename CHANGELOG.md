@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.4] - 2026-09-25
+
+### Changed
+
+- Upgraded `tools.jackson.core:jackson-databind` from 3.2.2 to 3.2.3. No advisory
+  is associated with this upgrade; as with previous releases, the newer version
+  propagates to downstream consumers.
+- Upgraded the Maven compiler plugin from 3.15.0 to 3.16.0 and the Maven Surefire
+  plugin from 3.5.6 to 3.6.0. Build-time only, with no effect on consumers of this
+  library.
+
 ## [1.4.3] - 2026-08-21
 
 ### Changed
