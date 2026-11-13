@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.6] - 2026-11-13
+
+### Changed
+
+- Upgraded `tools.jackson.core:jackson-databind` from 3.2.4 to 3.3.0. No advisory
+  is associated with this upgrade; as with previous releases, the newer version
+  propagates to downstream consumers.
+- The classpath-mode Surefire configuration now applies regardless of which Maven
+  profiles are active, instead of living in an `activeByDefault` profile that Maven
+  deactivated whenever another profile (such as `release`) was selected. Build-time
+  only, with no effect on consumers of this library.
+
 ## [1.4.5] - 2026-10-30
 
 ### Changed
